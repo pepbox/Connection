@@ -12,6 +12,8 @@ import PlayerService from "../../players/services/player.service";
 import { Player } from "../../players/models/player.model";
 import { Connection } from "../../players/models/connection.model";
 import TeamService from "../../teams/services/team.service";
+import FileService from "../../files/services/fileService";
+import { deleteFromS3 } from "../../../services/fileUpload";
 import archiver from "archiver";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "../../../services/fileUpload/s3Client";
@@ -23,6 +25,7 @@ const sessionService = new SessionService();
 const adminService = new AdminServices();
 const playerService = new PlayerService(Player);
 const teamService = new TeamService();
+const fileServiceInstance = new FileService();
 
 export const updateSession = async (
   req: Request,
@@ -356,3 +359,71 @@ export const downloadSessionSelfies = async (
     next(new AppError("Failed to download session selfies.", 500));
   }
 };
+
+export const uploadSessionLogo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const sessionId = req.user?.sessionId || req.params.sessionId;
+
+    if (!req.file) {
+      return next(new AppError("Logo image is required.", 400));
+    }
+
+    if (!sessionId) {
+      void deleteFromS3(req.file.key!).catch((e) =>
+        console.error("S3 cleanup failed on validation error:", e)
+      );
+      return next(new AppError("Session ID is required", 400));
+    }
+
+    const session = await sessionService.fetchSessionById(sessionId);
+    if (!session) {
+      void deleteFromS3(req.file.key!).catch((e) =>
+        console.error("S3 cleanup failed on missing session:", e)
+      );
+      return next(new AppError("Session not found", 404));
+    }
+
+    const logoImageInfo = {
+      originalName: req.file.originalname!,
+      fileName: req.file.key!,
+      size: req.file.size!,
+      mimetype: req.file.mimetype!,
+      location: req.file.location!,
+      bucket: req.file.bucket!,
+      etag: req.file.etag!,
+    };
+
+    const logoFile = await fileServiceInstance.uploadFile(logoImageInfo);
+
+    const updatedSession = await sessionService.updateSessionById(sessionId, {
+      companyLogoUrl: logoFile.location,
+      updatedAt: new Date()
+    });
+
+    SessionEmitters.toSession(sessionId.toString(), Events.SESSION_UPDATE, {});
+
+    res.status(200).json({
+      success: true,
+      message: "Session logo uploaded successfully",
+      data: {
+        session: updatedSession,
+        logoUrl: logoFile.location,
+      },
+    });
+  } catch (error) {
+    if (req.file?.key) {
+      try {
+        await deleteFromS3(req.file.key);
+      } catch (deleteErr) {
+        console.error("Failed to delete orphaned S3 logo file:", deleteErr);
+      }
+    }
+    console.error("Error uploading session logo:", error);
+    next(new AppError("Failed to upload session logo.", 500));
+  }
+};
+

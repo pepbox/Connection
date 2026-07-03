@@ -243,6 +243,8 @@ export const fetchAdminDashboardData = async (
                 adminName: admin.name,
                 gameStatus: session.status,
                 gameVersion: session.gameVersion || "v2",
+                companyName: session.companyName,
+                companyLogoUrl: session.companyLogoUrl,
             },
             players: playersData,
         };

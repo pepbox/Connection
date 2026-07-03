@@ -1,13 +1,23 @@
 import { Box, IconButton, Typography } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../app/hooks";
+import { RootState } from "../../app/store";
+import { useGetSessionQuery } from "../../features/game/services/gameArena.Api";
 
 interface GameHeaderProps {
   title?: string;
 }
 
-const GameHeader: React.FC<GameHeaderProps> = ({ title = "Connections" }) => {
+const GameHeader: React.FC<GameHeaderProps> = ({ title }) => {
   const navigate = useNavigate();
+  const { sessionId } = useAppSelector((state: RootState) => state.game);
+  
+  const { data: sessionData } = useGetSessionQuery(sessionId as string, {
+    skip: !sessionId,
+  });
+
+  const displayTitle = title || sessionData?.companyName || "Konnect";
 
   return (
     <Box
@@ -19,9 +29,18 @@ const GameHeader: React.FC<GameHeaderProps> = ({ title = "Connections" }) => {
         color: "black",
       }}
     >
-      <IconButton onClick={() => navigate(-1)} sx={{ p: 0.5 }}>
-        <ArrowBack />
-      </IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <IconButton onClick={() => navigate(-1)} sx={{ p: 0.5 }}>
+          <ArrowBack />
+        </IconButton>
+        {sessionData?.companyLogoUrl && (
+          <img 
+            src={sessionData.companyLogoUrl} 
+            alt="Logo" 
+            style={{ height: '30px', marginLeft: '8px', objectFit: 'contain' }} 
+          />
+        )}
+      </Box>
       <Typography
         variant="h6"
         textAlign="center"
@@ -31,7 +50,7 @@ const GameHeader: React.FC<GameHeaderProps> = ({ title = "Connections" }) => {
           fontSize: "18px",
         }}
       >
-        {title}
+        {displayTitle}
       </Typography>
     </Box>
   );

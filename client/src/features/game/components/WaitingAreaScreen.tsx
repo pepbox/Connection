@@ -5,6 +5,7 @@ import waitingVideo from "../../../assets/Waiting-lobby-animation.webm";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../app/hooks";
 import { RootState } from "../../../app/store";
+import { useGetSessionQuery } from "../services/gameArena.Api";
 
 const WaitingAreaScreen: React.FC = () => {
   const isGameStarted = useAppSelector(
@@ -12,6 +13,10 @@ const WaitingAreaScreen: React.FC = () => {
   );
   const { sessionId } = useAppSelector((state: RootState) => state.game);
   const navigate = useNavigate();
+  
+  const { data: sessionData } = useGetSessionQuery(sessionId as string, {
+    skip: !sessionId,
+  });
   useEffect(() => {
     if (isGameStarted) {
       navigate(`/game/${sessionId}/arena`, { replace: true });
@@ -34,8 +39,13 @@ const WaitingAreaScreen: React.FC = () => {
         margin: "0 auto",
       }}
     >
-      <Typography variant="h3" mt={4} color="primary.main" fontWeight="800">
-        Connections
+      {sessionData?.companyLogoUrl && (
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+          <img src={sessionData.companyLogoUrl} alt="Company Logo" style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }} />
+        </Box>
+      )}
+      <Typography variant="h3" mt={sessionData?.companyLogoUrl ? 0 : 4} color="primary.main" fontWeight="800">
+        {sessionData?.companyName || "Konnect"}
       </Typography>
       <Box
         component="video"

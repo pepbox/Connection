@@ -50,6 +50,19 @@ export const adminApi = api.injectEndpoints({
       invalidatesTags: ["AdminPlayer"],
     }),
 
+    uploadSessionLogo: builder.mutation<{ success: boolean; data: any; message: string }, { sessionId: string; file: File }>({
+      query: ({ sessionId, file }) => {
+        const formData = new FormData();
+        formData.append('logo', file);
+        return {
+          url: `/session/upload-logo/${sessionId}`,
+          method: 'POST',
+          body: formData,
+        };
+      },
+      invalidatesTags: ["AdminPlayer"],
+    }),
+
     fetchDashboardData: builder.query({
       query: () => ({
         url: '/admin/fetchDashboardData',
@@ -116,5 +129,6 @@ export const {
   useLazyGetPlayerWithResponsesQuery,
   useLazyFetchAdminQuery,
   useLazyCheckPlayersReadinessQuery,
-  useDownloadSessionSelfiesMutation
+  useDownloadSessionSelfiesMutation,
+  useUploadSessionLogoMutation
 } = adminApi;

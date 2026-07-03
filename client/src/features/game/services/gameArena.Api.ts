@@ -12,8 +12,13 @@ export interface Player {
 export interface Session {
   _id: string;
   name: string;
-  status?: string;
-  gameVersion?: 'v2';
+  status: "pending" | "playing" | "ended";
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  gameVersion: string;
+  companyName?: string;
+  companyLogoUrl?: string;
 }
 
 export const gameApi = api.injectEndpoints({

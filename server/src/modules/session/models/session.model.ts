@@ -19,6 +19,13 @@ const sessionSchema = new Schema<ISession>({
         enum: ['v2'],
         default: 'v2'
     },
+    companyName: {
+        type: String,
+        trim: true
+    },
+    companyLogoUrl: {
+        type: String
+    }
 }, {
     timestamps: true
 });

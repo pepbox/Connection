@@ -80,7 +80,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
           color="black"
           textAlign="center"
         >
-          🏆 Game Leaderboard 🏆
+          Players Selfie
         </Typography>
       </Paper>
 

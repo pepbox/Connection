@@ -8,4 +8,6 @@ export interface ISession extends Document {
     status?: SessionStatus;
     numberOfTeams?: number | null;
     gameVersion?: 'v2';
+    companyName?: string;
+    companyLogoUrl?: string;
 }

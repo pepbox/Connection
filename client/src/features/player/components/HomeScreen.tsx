@@ -14,6 +14,7 @@ import { setPlayer } from "../services/player.slice";
 import { RootState } from "../../../app/store";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import homescreenLottie from "../../../assets/LogInPage-animation.lottie";
+import { useGetSessionQuery } from "../../game/services/gameArena.Api";
 
 const HomeScreen: React.FC = () => {
   const { isAuthenticated } = useAppSelector(
@@ -25,6 +26,10 @@ const HomeScreen: React.FC = () => {
   const [lastname, setLastname] = React.useState<string>("");
   const [showSnackbar, setShowSnackbar] = useState(false);
   const { sessionId } = useAppSelector((state: RootState) => state.game);
+  
+  const { data: sessionData } = useGetSessionQuery(sessionId as string, {
+    skip: !sessionId,
+  });
 
   const MAX_NAME_LENGTH = 20;
 
@@ -96,6 +101,12 @@ const HomeScreen: React.FC = () => {
         boxSizing: "border-box",
       }}
     >
+      {sessionData?.companyLogoUrl && (
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+          <img src={sessionData.companyLogoUrl} alt="Company Logo" style={{ maxHeight: '100px', maxWidth: '100%', objectFit: 'contain' }} />
+        </Box>
+      )}
+
       <Typography
         variant="h1"
         sx={{
@@ -106,7 +117,7 @@ const HomeScreen: React.FC = () => {
           mb: 2,
         }}
       >
-        Connections
+        {sessionData?.companyName || "Konnect"}
       </Typography>
 
       <Box

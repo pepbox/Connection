@@ -40,6 +40,8 @@ export interface HeaderData {
     adminName?: string;
     gameVersion?: 'v1' | 'v2' | 'both';
     activeVersion?: 'v1' | 'v2' | null;
+    companyName?: string;
+    companyLogoUrl?: string;
 }
 
 export interface Player {
