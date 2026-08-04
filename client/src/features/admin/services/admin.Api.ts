@@ -25,7 +25,7 @@ export const adminApi = api.injectEndpoints({
       }),
     }),
 
-    adminLogout: builder.mutation({
+    adminLogout: builder.mutation<any, void>({
       query: () => ({
         url: '/admin/logout',
         method: 'POST',

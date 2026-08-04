@@ -106,6 +106,8 @@ export const loginAdmin = async (
             message: "Admin logged in successfully.",
             data: {
                 admin,
+                token: accessToken,
+                refreshToken: refreshToken,
             },
             success: true,
         });
@@ -151,6 +153,12 @@ export const logoutAdmin = async (
 ) => {
     try {
         res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        });
+
+        res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -390,5 +398,110 @@ export const checkPlayersReadiness = async (
     } catch (error) {
         console.error("Error checking players readiness:", error);
         next(new AppError("Failed to check players readiness.", 500));
+    }
+};
+
+export const getPlayerWithResponses = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { playerId } = req.params;
+        const sessionId = req.user?.sessionId;
+
+        if (!playerId || !sessionId) {
+            return next(new AppError("Player ID and Session ID are required.", 400));
+        }
+
+        const player = await Player.findById(playerId);
+        if (!player) {
+            return next(new AppError("Player not found.", 404));
+        }
+
+        // Get player photo url
+        let profilePhotoUrl = "";
+        if (player.profilePhoto) {
+            const file = await fileService.getFileById(player.profilePhoto.toString());
+            profilePhotoUrl = file?.location || "";
+        }
+
+        let teamNumber = 1;
+        if (player.team) {
+            try {
+                const team = await teamService.fetchTeamById(player.team.toString());
+                teamNumber = team?.teamNumber || 1;
+            } catch (err) {
+                console.error("Team fetch error in player responses:", err);
+            }
+        }
+
+        // Fetch all connections involving this player in this session
+        const connections = await Connection.find({
+            session: sessionId,
+            $or: [{ playerA: playerId }, { playerB: playerId }]
+        });
+
+        const responses: any[] = [];
+
+        for (const conn of connections) {
+            const isPlayerA = conn.playerA.toString() === playerId.toString();
+            const partnerId = isPlayerA ? conn.playerB : conn.playerA;
+            const partner = await Player.findById(partnerId);
+            const partnerName = partner?.name || "Partner";
+
+            // Questions written by this player. Partner answered these in their answers list.
+            const myQuestions = await CustomQuestion.find({ player: playerId, session: sessionId });
+            const partnerAnswersList = isPlayerA ? conn.answersB : conn.answersA;
+
+            if (myQuestions && partnerAnswersList) {
+                myQuestions.forEach((q: any) => {
+                    const matchedAnswer = partnerAnswersList.find((ans: any) => ans.questionId.toString() === q._id.toString());
+                    if (matchedAnswer) {
+                        responses.push({
+                            questionId: q._id.toString() + "_asked",
+                            keyAspect: `You asked ${partnerName}`,
+                            questionText: q.questionText,
+                            response: matchedAnswer.answer,
+                        });
+                    }
+                });
+            }
+
+            // Questions written by partner. This player answered these in their answers list.
+            const partnerQuestions = await CustomQuestion.find({ player: partnerId, session: sessionId });
+            const myAnswersList = isPlayerA ? conn.answersA : conn.answersB;
+
+            if (partnerQuestions && myAnswersList) {
+                partnerQuestions.forEach((q: any) => {
+                    const matchedAnswer = myAnswersList.find((ans: any) => ans.questionId.toString() === q._id.toString());
+                    if (matchedAnswer) {
+                        responses.push({
+                            questionId: q._id.toString() + "_answered",
+                            keyAspect: `Answered ${partnerName}'s Q`,
+                            questionText: q.questionText,
+                            response: matchedAnswer.answer,
+                        });
+                    }
+                });
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                player: {
+                    id: player._id.toString(),
+                    name: player.name,
+                    profilePhoto: profilePhotoUrl,
+                    score: player.score || 0,
+                    team: teamNumber,
+                },
+                responses,
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching player with responses:", error);
+        next(new AppError("Failed to fetch player responses.", 500));
     }
 };

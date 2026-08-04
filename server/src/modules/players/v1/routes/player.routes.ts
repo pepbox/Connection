@@ -17,5 +17,6 @@ router.get('/getAllTeams/:sessionId', asyncHandeler(teamControllers.getAllTeamsB
 router.get('/fetchPlayer', authenticateUser, asyncHandeler(playerControllers.fetchPlayer));
 router.get('/getPlayersBySession', authenticateUser, asyncHandeler(playerControllers.getPlayersBySession));
 router.post('/logout', authenticateUser, asyncHandeler(playerControllers.logoutPlayer));
+router.post('/refresh', asyncHandeler(playerControllers.refreshToken));
 
 export default router;

@@ -8,7 +8,9 @@ import { Connection } from "../../models/connection.model";
 import {
   generateAccessToken,
   generateRefreshToken,
+  verifyRefreshToken,
 } from "../../../../utils/jwtUtils";
+import Admin from "../../../admin/models/admin.model";
 import { setCookieOptions } from "../../../../utils/cookieOptions";
 import { SessionEmitters } from "../../../../services/socket/sessionEmitters";
 import { Events } from "../../../../services/socket/enums/Events";
@@ -114,7 +116,11 @@ export const onboardPlayer = async (
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: "Player onboarded successfully",
-      data: player,
+      data: {
+        ...player.toObject(),
+        token: accessToken,
+        refreshToken: refreshToken,
+      },
     });
   } catch (error) {
     if (error instanceof AppError) {
@@ -320,5 +326,69 @@ export const logoutPlayer = async (
   } catch (error) {
     console.error("Error logging out player:", error);
     next(new AppError("Failed to log out player.", 500));
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const token = req.cookies.refreshToken || req.body.refreshToken;
+    if (!token) {
+      return next(new AppError("No refresh token provided.", 401));
+    }
+
+    let decoded: any;
+    try {
+      decoded = verifyRefreshToken(token);
+    } catch (err) {
+      return next(new AppError("Invalid or expired refresh token.", 401));
+    }
+
+    if (!decoded || !decoded.id) {
+      return next(new AppError("Invalid refresh token payload.", 401));
+    }
+
+    // 1. Look up Player
+    const player = await Player.findById(decoded.id);
+    let role: "USER" | "ADMIN" | null = null;
+    let sessionId: string | null = null;
+
+    if (player) {
+      role = "USER";
+      sessionId = player.session.toString();
+    } else {
+      // 2. Look up Admin
+      const admin = await Admin.findById(decoded.id);
+      if (admin) {
+        role = "ADMIN";
+        sessionId = admin.sessionId.toString();
+      }
+    }
+
+    if (!role || !sessionId) {
+      return next(new AppError("User session not found.", 401));
+    }
+
+    const newAccessToken = generateAccessToken({
+      id: decoded.id,
+      role,
+      sessionId,
+    });
+
+    res.cookie("accessToken", newAccessToken, setCookieOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "Access token refreshed successfully.",
+      data: {
+        token: newAccessToken,
+      },
+    });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    next(new AppError("Failed to refresh access token.", 500));
   }
 };

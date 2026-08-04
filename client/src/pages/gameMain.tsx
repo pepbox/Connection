@@ -12,10 +12,11 @@ import Loader from "../components/ui/Loader";
 import AuthWrapper from "../components/auth/AuthWrapper";
 import { useAppDispatch, useAppSelector } from "../app/rootReducer";
 import { setSessionId } from "../features/game/services/gameSlice";
+import { logoutPlayer } from "../features/player/services/player.slice";
 
 const GameMain = () => {
   const [fetchUser, { isUninitialized, isLoading: isUserLoading }] = useLazyFetchPlayerQuery();
-  const { isAuthenticated } = useAppSelector(
+  const { isAuthenticated, player } = useAppSelector(
     (state: RootState) => state.player
   );
   const dispatch = useAppDispatch();
@@ -28,6 +29,21 @@ const GameMain = () => {
   useEffect(() => {
     fetchUser({});
   }, [isAuthenticated, fetchUser]);
+
+  // Session verification: Ensure logged-in player belongs to the requested route session
+  useEffect(() => {
+    if (isAuthenticated && player && player.session && sessionId) {
+      const playerSessionId =
+        typeof player.session === "object" && player.session !== null
+          ? (player.session as any)._id?.toString() || (player.session as any).id?.toString()
+          : player.session.toString();
+
+      if (playerSessionId !== sessionId.toString()) {
+        console.warn("Session ID mismatch! Logging out player from current session view.");
+        dispatch(logoutPlayer());
+      }
+    }
+  }, [isAuthenticated, player, sessionId, dispatch]);
 
   if (isUninitialized || isUserLoading) {
     return <Loader />;

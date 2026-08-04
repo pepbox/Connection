@@ -68,7 +68,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const handleLogout = () => {
-    AdminLogout({})
+    AdminLogout()
       .unwrap()
       .then(() => {
         navigate(`/admin/${sessionId}/login`);

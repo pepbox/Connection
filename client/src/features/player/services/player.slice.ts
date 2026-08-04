@@ -14,7 +14,9 @@ const initialState = {
     player: null as IPlayer | null,
     isLoading: false,
     error: null as SerializedError | null,
-    isAuthenticated: false,
+    isAuthenticated: typeof window !== 'undefined' && localStorage.getItem('playerToken') ? true : false,
+    token: typeof window !== 'undefined' ? localStorage.getItem('playerToken') || null : null,
+    refreshToken: typeof window !== 'undefined' ? localStorage.getItem('playerRefreshToken') || null : null,
 };
 
 const playerSlice = createSlice({
@@ -24,16 +26,25 @@ const playerSlice = createSlice({
         setPlayer: (state, action) => {
             state.player = action.payload;
         },
+        setPlayerToken: (state, action) => {
+            state.token = action.payload.token;
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('playerToken', action.payload.token);
+            }
+        },
         clearPlayer: (state) => {
             state.player = null;
         },
         logoutPlayer: (state) => {
             state.player = null;
             state.isAuthenticated = false;
+            state.token = null;
+            state.refreshToken = null;
             state.error = null;
             // Clear entire localStorage on logout
             if (typeof window !== 'undefined') {
                 localStorage.clear();
+                sessionStorage.clear();
             }
         },
     },
@@ -48,9 +59,22 @@ const playerSlice = createSlice({
             )
             .addMatcher(
                 playerApi.endpoints.onboardPlayer.matchFulfilled,
-                (state) => {
+                (state, action: any) => {
                     state.isLoading = false;
                     state.isAuthenticated = true;
+                    if (action.payload) {
+                        state.player = action.payload;
+                        state.token = action.payload.token || null;
+                        state.refreshToken = action.payload.refreshToken || null;
+                        if (typeof window !== 'undefined') {
+                            if (action.payload.token) {
+                                localStorage.setItem('playerToken', action.payload.token);
+                            }
+                            if (action.payload.refreshToken) {
+                                localStorage.setItem('playerRefreshToken', action.payload.refreshToken);
+                            }
+                        }
+                    }
                 }
             )
             .addMatcher(
@@ -71,9 +95,12 @@ const playerSlice = createSlice({
             )
             .addMatcher(
                 playerApi.endpoints.fetchPlayer.matchFulfilled,
-                (state) => {
+                (state, action: any) => {
                     state.isLoading = false;
                     state.isAuthenticated = true;
+                    if (action.payload) {
+                        state.player = action.payload;
+                    }
                 }
             )
             .addMatcher(
@@ -89,6 +116,6 @@ const playerSlice = createSlice({
     },
 });
 
-export const { setPlayer, clearPlayer, logoutPlayer } = playerSlice.actions;
+export const { setPlayer, setPlayerToken, clearPlayer, logoutPlayer } = playerSlice.actions;
 
 export default playerSlice.reducer;

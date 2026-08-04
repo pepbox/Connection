@@ -10,6 +10,17 @@ import { BaseQueryFn, FetchArgs } from "@reduxjs/toolkit/query";
 const baseQuery = fetchBaseQuery({
     baseUrl: import.meta.env.VITE_BACKEND_BASE_URL,
     credentials: "include", // Include credentials for cross-origin requests
+    prepareHeaders: (headers) => {
+        // Fallback token authentication in case cookies are blocked (e.g. on Safari/mobile)
+        const token =
+            localStorage.getItem("adminToken") ||
+            localStorage.getItem("playerToken");
+
+        if (token) {
+            headers.set("Authorization", `Bearer ${token}`);
+        }
+        return headers;
+    },
 });
 
 // Helper function to determine the refresh endpoint based on the original request URL
@@ -57,37 +68,50 @@ const baseQueryWithReauth: BaseQueryFn<
     let result = await customBaseQuery(args, api, extraOptions);
 
     // If unauthorized (token expired or invalid), attempt refresh
-    // if (
-    //     result.error &&
-    //     (result.error.status === 401 || result.error.status === 403)
-    // ) {
-    // console.warn("Access token expired. Attempting refresh...");
-    // Extract URL from args to determine the appropriate refresh endpoint
-    // const originalUrl = typeof args === 'string' ? args : args.url;
-    // const refreshEndpoint = getRefreshEndpoint(originalUrl);
+    if (
+        result.error &&
+        (result.error.status === 401 || result.error.status === 403)
+    ) {
+        console.warn("Access token expired. Attempting refresh...");
 
-    // Try to refresh the token
-    // const refreshResult = await baseQuery(
-    //     { url: refreshEndpoint, method: "POST" },
-    //     api,
-    //     extraOptions
-    // );
+        const refreshToken =
+            localStorage.getItem("adminRefreshToken") ||
+            localStorage.getItem("playerRefreshToken");
 
-    // if (refreshResult.data) {
-    //     // Optionally dispatch new token (if using Redux store for access token)
-    //     api.dispatch({
-    //         type: "auth/tokenRefreshed",
-    //         payload: refreshResult.data,
-    //     });
+        // Try to refresh the token
+        const refreshResult = await baseQuery(
+            { 
+                url: "/player/refresh", 
+                method: "POST",
+                body: { refreshToken },
+            },
+            api,
+            extraOptions
+        );
 
-    //     // Retry the original query
-    //     result = await baseQuery(args, api, extraOptions);
-    // } else {
-    //     console.warn("Refresh token invalid. Logging out.");
-    //     // Optional: force logout or reset auth state
-    //     api.dispatch({ type: "auth/logout" });
-    // }
-    // }
+        if (refreshResult.data) {
+            console.log("Token refreshed successfully. Retrying original request...");
+            const newToken = (refreshResult.data as any)?.data?.token;
+            if (newToken) {
+                api.dispatch({ type: "Player/setPlayerToken", payload: { token: newToken } });
+                api.dispatch({ type: "admin/setToken", payload: { token: newToken } });
+            }
+            // Retry the original query
+            result = await customBaseQuery(args, api, extraOptions);
+        } else {
+            console.warn("Refresh token invalid or expired. Logging out.");
+            
+            // Dispatch logout actions to clean up store
+            api.dispatch({ type: "Player/logoutPlayer" });
+            api.dispatch({ type: "admin/clearAdmin" });
+
+            // Clear storage
+            if (typeof window !== "undefined") {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+        }
+    }
 
     return result;
 };

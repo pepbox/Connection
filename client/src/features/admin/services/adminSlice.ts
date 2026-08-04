@@ -5,6 +5,7 @@ import { adminApi } from './admin.Api';
 export interface AdminUser {
     id: string;
     name: string;
+    sessionId?: string;
 }
 
 export interface AdminState {
@@ -13,6 +14,7 @@ export interface AdminState {
     isLoading: boolean;
     error: SerializedError | null;
     token: string | null;
+    refreshToken: string | null;
 }
 
 const initialState: AdminState = {
@@ -21,6 +23,7 @@ const initialState: AdminState = {
     isLoading: false,
     error: null,
     token: localStorage.getItem('adminToken') || null,
+    refreshToken: localStorage.getItem('adminRefreshToken') || null,
 };
 
 const adminSlice = createSlice({
@@ -32,16 +35,22 @@ const adminSlice = createSlice({
             state.isAuthenticated = true;
             state.error = null;
         },
-        setToken: (state, action: PayloadAction<string>) => {
-            state.token = action.payload;
-            localStorage.setItem('adminToken', action.payload);
+        setToken: (state, action: PayloadAction<{ token: string; refreshToken?: string }>) => {
+            state.token = action.payload.token;
+            localStorage.setItem('adminToken', action.payload.token);
+            if (action.payload.refreshToken) {
+                state.refreshToken = action.payload.refreshToken;
+                localStorage.setItem('adminRefreshToken', action.payload.refreshToken);
+            }
         },
         clearAdmin: (state) => {
             state.admin = null;
             state.isAuthenticated = false;
             state.token = null;
+            state.refreshToken = null;
             state.error = null;
             localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminRefreshToken');
         },
         clearError: (state) => {
             state.error = null;
@@ -49,9 +58,13 @@ const adminSlice = createSlice({
         // Action to initialize auth state from localStorage
         initializeAuth: (state) => {
             const token = localStorage.getItem('adminToken');
+            const refreshToken = localStorage.getItem('adminRefreshToken');
             if (token) {
                 state.token = token;
                 state.isAuthenticated = true;
+            }
+            if (refreshToken) {
+                state.refreshToken = refreshToken;
             }
         },
     },
@@ -70,12 +83,16 @@ const adminSlice = createSlice({
                 (state, action: any) => {
                     state.isLoading = false;
                     if (action.payload.success) {
-                        if (action.payload.admin) {
-                            state.admin = action.payload.admin;
+                        if (action.payload.data?.admin) {
+                            state.admin = action.payload.data.admin;
                         }
-                        if (action.payload.token) {
-                            state.token = action.payload.token;
-                            localStorage.setItem('adminToken', action.payload.token);
+                        if (action.payload.data?.token) {
+                            state.token = action.payload.data.token;
+                            localStorage.setItem('adminToken', action.payload.data.token);
+                        }
+                        if (action.payload.data?.refreshToken) {
+                            state.refreshToken = action.payload.data.refreshToken;
+                            localStorage.setItem('adminRefreshToken', action.payload.data.refreshToken);
                         }
                         state.isAuthenticated = true;
                         state.error = null;
@@ -90,7 +107,9 @@ const adminSlice = createSlice({
                     state.isAuthenticated = false;
                     state.admin = null;
                     state.token = null;
+                    state.refreshToken = null;
                     localStorage.removeItem('adminToken');
+                    localStorage.removeItem('adminRefreshToken');
                 }
             );
 
@@ -105,9 +124,12 @@ const adminSlice = createSlice({
             )
             .addMatcher(
                 adminApi.endpoints.fetchAdmin.matchFulfilled,
-                (state) => {
+                (state, action: any) => {
                     state.isLoading = false;
                     state.isAuthenticated = true;
+                    if (action.payload) {
+                        state.admin = action.payload;
+                    }
                 }
             )
             .addMatcher(

@@ -7,7 +7,14 @@ dotenv.config();
 
 export const authenticateUser = (req: Request, res: Response, next: NextFunction): void => {
 
-  const token = req.cookies.accessToken;
+  let token = req.cookies.accessToken;
+
+  if (!token && req.headers.authorization) {
+    const parts = req.headers.authorization.split(" ");
+    if (parts[0] === "Bearer" && parts[1]) {
+      token = parts[1];
+    }
+  }
 
   if (!token) {
     res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });

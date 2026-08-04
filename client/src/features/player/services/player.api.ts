@@ -9,6 +9,7 @@ export const playerApi = api.injectEndpoints({
                 method: 'POST',
                 body,
             }),
+            transformResponse: (response: any) => response.data,
         }),
 
         fetchPlayer: builder.query({
@@ -16,6 +17,7 @@ export const playerApi = api.injectEndpoints({
                 url: '/player/fetchPlayer',
                 method: 'GET',
             }),
+            transformResponse: (response: any) => response.data,
         }),
 
 

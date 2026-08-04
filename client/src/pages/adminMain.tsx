@@ -11,11 +11,12 @@ import Loader from "../components/ui/Loader";
 import AuthWrapper from "../components/auth/AuthWrapper";
 import { useAppDispatch } from "../app/rootReducer";
 import { setSessionId } from "../features/game/services/gameSlice";
+import { clearAdmin } from "../features/admin/services/adminSlice";
 
 const AdminMain = () => {
   const [FetchAdmin, { isUninitialized, isLoading: isAdminLoading }] = useLazyFetchAdminQuery();
-  const { isAuthenticated } = useAppSelector(
-    (state: RootState) => state.player
+  const { isAuthenticated, admin } = useAppSelector(
+    (state: RootState) => state.admin
   );
   const dispatch = useAppDispatch();
   const sessionId = useParams<{ sessionId: string }>().sessionId;
@@ -27,6 +28,21 @@ const AdminMain = () => {
   useEffect(() => {
     FetchAdmin({});
   }, [isAuthenticated, FetchAdmin]);
+
+  // Session verification: Ensure logged-in admin belongs to the requested route session
+  useEffect(() => {
+    if (isAuthenticated && admin && admin.sessionId && sessionId) {
+      const adminSessionId =
+        typeof admin.sessionId === "object" && admin.sessionId !== null
+          ? (admin.sessionId as any)._id?.toString() || (admin.sessionId as any).id?.toString()
+          : admin.sessionId.toString();
+
+      if (adminSessionId !== sessionId.toString()) {
+        console.warn("Session ID mismatch! Logging out admin from current session view.");
+        dispatch(clearAdmin());
+      }
+    }
+  }, [isAuthenticated, admin, sessionId, dispatch]);
 
   if (isUninitialized || isAdminLoading) {
     return <Loader />;
