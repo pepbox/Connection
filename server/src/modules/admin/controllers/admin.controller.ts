@@ -202,22 +202,31 @@ export const fetchAdminDashboardData = async (
                 session: sessionId
             });
 
-            let partnerName = "None";
-            let customAnswersSubmitted = 0;
-            let selfieUploaded = false;
+            const connectedTeammatesCount = await Connection.countDocuments({
+                session: sessionId,
+                status: "connected",
+                $or: [{ playerA: player._id }, { playerB: player._id }]
+            });
 
-            const conn = await Connection.findOne({
+            const playerConnections = await Connection.find({
                 session: sessionId,
                 $or: [{ playerA: player._id }, { playerB: player._id }]
             });
 
-            if (conn) {
-                const isPlayerA = conn.playerA.toString() === player._id.toString();
-                const partnerId = isPlayerA ? conn.playerB : conn.playerA;
-                const partner = await playerService.getPlayerById(partnerId.toString());
-                partnerName = partner?.name || "Pending connection";
-                customAnswersSubmitted = isPlayerA ? (conn.answersA?.length || 0) : (conn.answersB?.length || 0);
-                selfieUploaded = !!(conn.selfieA || conn.selfieB);
+            let customAnswersSubmitted = 0;
+            for (const c of playerConnections) {
+                const isPlayerA = c.playerA.toString() === player._id.toString();
+                customAnswersSubmitted += isPlayerA ? (c.answersA?.length || 0) : (c.answersB?.length || 0);
+            }
+
+            let selfieUploaded = false;
+            const latestConn = await Connection.findOne({
+                session: sessionId,
+                $or: [{ playerA: player._id }, { playerB: player._id }]
+            }).sort({ updatedAt: -1 });
+
+            if (latestConn) {
+                selfieUploaded = !!(latestConn.selfieA || latestConn.selfieB);
             }
 
             let teamNumber = 1;
@@ -237,7 +246,7 @@ export const fetchAdminDashboardData = async (
                 team: teamNumber,
                 v2: {
                     customQuestionsCreated,
-                    partnerName,
+                    connectedTeammatesCount,
                     customAnswersSubmitted,
                     selfieUploaded
                 }
