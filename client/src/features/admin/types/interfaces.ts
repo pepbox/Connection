@@ -116,6 +116,8 @@ export interface SelfieData {
 export interface LeaderboardData {
     playerRankings: PlayerRanking[];
     selfies: SelfieData[];
+    companyName?: string;
+    companyLogoUrl?: string;
 }
 
 export interface LeaderboardProps {

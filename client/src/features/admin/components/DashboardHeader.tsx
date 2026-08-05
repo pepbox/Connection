@@ -78,7 +78,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   const handleViewLeaderboard = () => {
-    navigate(`/admin/${sessionId}/leaderboard`);
+    window.open(`/admin/${sessionId}/leaderboard`, "_blank");
   };
 
   const handleDownloadSelfies = async () => {
@@ -415,7 +415,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         <DialogTitle sx={{ fontFamily: '"Josefin Sans", sans-serif', fontWeight: 800, pb: 1 }}>
           Edit Session Branding
         </DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1.5 }}>
           <TextField
             label="Company Name"
             variant="outlined"
@@ -424,6 +424,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             onChange={(e) => setCompanyName(e.target.value)}
             fullWidth
             sx={{
+              mt: 1,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "10px",
               },

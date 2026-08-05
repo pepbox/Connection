@@ -40,6 +40,11 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
   players,
   customQuestionsCount = 2,
 }) => {
+  const totalJoined = players?.length || 0;
+  // const pendingCount = players?.filter(
+  //   (player) => (player.v2?.customQuestionsCreated || 0) < (customQuestionsCount || 2)
+  // ).length || 0;
+
   const [sortField, setSortField] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState<string>(""); // Search query state
@@ -221,34 +226,66 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
 
   return (
     <>
-      {/* Search Filter */}
+      {/* Search Filter & Status Summary */}
       <Box
         mb={2}
-        sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}
+        sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", justifyContent: "space-between" }}
       >
-        <TextField
-          size="small"
-          placeholder="Search players by name..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{
-            minWidth: 200,
-            maxWidth: 300,
-            "& .MuiOutlinedInput-root": {
-              height: "40px",
-              borderRadius: "8px",
-              fontFamily: '"Josefin Sans", sans-serif',
-            },
-          }}
-          InputProps={{
-            startAdornment: (
-              <Box sx={{ mr: 1, color: "text.secondary", fontSize: "0.9rem" }}>🔍</Box>
-            ),
-          }}
-        />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <TextField
+            size="small"
+            placeholder="Search players by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{
+              minWidth: 200,
+              maxWidth: 300,
+              "& .MuiOutlinedInput-root": {
+                height: "40px",
+                borderRadius: "8px",
+                fontFamily: '"Josefin Sans", sans-serif',
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ mr: 1, color: "text.secondary", fontSize: "0.9rem" }}>🔍</Box>
+              ),
+            }}
+          />
 
-        {/* Configure Required Questions Count Button */}
-        <Button
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Chip
+              label={`Joined: ${totalJoined}`}
+              sx={{
+                fontFamily: '"Josefin Sans", sans-serif',
+                fontWeight: 700,
+                backgroundColor: "rgba(79, 209, 197, 0.15)",
+                color: "#319795",
+                borderRadius: "8px",
+                height: "40px",
+                fontSize: "0.875rem",
+                px: 1,
+              }}
+            />
+            {/* <Chip
+              label={`Pending: ${pendingCount}`}
+              sx={{
+                fontFamily: '"Josefin Sans", sans-serif',
+                fontWeight: 700,
+                backgroundColor: pendingCount > 0 ? "rgba(252, 166, 30, 0.15)" : "rgba(72, 187, 120, 0.15)",
+                color: pendingCount > 0 ? "#d69e2e" : "#38a169",
+                borderRadius: "8px",
+                height: "40px",
+                fontSize: "0.875rem",
+                px: 1,
+              }}
+            /> */}
+          </Box>
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          {/* Configure Required Questions Count Button */}
+          <Button
           variant="contained"
           startIcon={<QuizIcon />}
           onClick={() => {
@@ -306,6 +343,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
             </Typography>
           </Box>
         )}
+        </Box>
       </Box>
 
       {!isMobile && (

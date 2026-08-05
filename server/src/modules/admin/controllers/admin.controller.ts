@@ -324,9 +324,13 @@ export const fetchLeaderboardData = async (
             })
             .slice(0, 12); // Get only top 12 latest selfies
 
+        const session = await sessionService.fetchSessionById(sessionId);
+
         const data = {
             playerRankings: [],
             selfies: filteredAndSortedSelfies,
+            companyName: session?.companyName,
+            companyLogoUrl: session?.companyLogoUrl,
         };
 
         res.status(200).json({

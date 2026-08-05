@@ -17,7 +17,7 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
   if (selfies.length === 0) {
     return (
       <Box>
-        <Typography
+        {/* <Typography
           variant="h5"
           fontWeight="bold"
           mb={3}
@@ -25,7 +25,7 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
           color="primary"
         >
           Guess Selfies
-        </Typography>
+        </Typography> */}
         <Paper
           sx={{
             p: 4,
@@ -44,14 +44,15 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
 
   return (
     <Box>
-            <Typography
+      <Typography
         variant="h5"
         fontWeight="bold"
         mb={3}
         textAlign="center"
         color="primary"
+        sx={{ fontFamily: '"Josefin Sans", sans-serif' }}
       >
-        📸 Photo Gallery
+        📸 Photo Gallery ({selfies.length})
       </Typography>
       <Box
         sx={{

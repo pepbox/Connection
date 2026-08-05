@@ -74,14 +74,56 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
           </Button>
         </Box>
         
-        <Typography
-          variant="h3"
-          fontWeight="bold"
-          color="black"
-          textAlign="center"
-        >
-          Players Selfie
-        </Typography>
+        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2}>
+          {data.companyLogoUrl ? (
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "16px",
+                boxShadow: "0px 6px 12px rgba(30, 58, 138, 0.15)",
+                backgroundColor: "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                border: "1px solid rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <img
+                src={data.companyLogoUrl}
+                alt="Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </Box>
+          ) : data.companyName ? (
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "16px",
+                boxShadow: "0px 6px 12px rgba(30, 58, 138, 0.15)",
+                backgroundColor: "#1e3a8a",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="h5" sx={{ color: "#fff", fontWeight: "bold", fontFamily: '"Josefin Sans", sans-serif' }}>
+                {data.companyName.charAt(0).toUpperCase()}
+              </Typography>
+            </Box>
+          ) : null}
+          <Typography
+            variant="h3"
+            fontWeight="bold"
+            color="black"
+            textAlign="center"
+            sx={{ fontFamily: '"Josefin Sans", sans-serif', fontSize: { xs: "2rem", md: "2.5rem" } }}
+          >
+            {data.companyName || "Players Selfie"}
+          </Typography>
+        </Box>
       </Paper>
 
       <Box sx={{ px: 4, pb: 4 }}>
