@@ -72,12 +72,11 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          bgcolor: "primary.main",
-          backgroundImage: "linear-gradient(135deg, #A78BFA 0%, #764ba2 100%)",
+          background: "linear-gradient(135deg, #ef3349 0%, #ff7c27 100%)",
           color: "white",
           borderRadius: "16px",
           p: 3,
-          boxShadow: "0px 4px 20px rgba(167, 139, 250, 0.2)",
+          boxShadow: "0px 4px 20px rgba(239, 51, 73, 0.2)",
           position: "relative",
           mb: 1,
         }}
@@ -93,10 +92,10 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
             mb: 2,
           }}
         />
-        <Typography variant="h5" fontWeight="bold">
+        <Typography variant="h5" fontWeight="bold" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
           Get to Know {partnerName}
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9, textAlign: "center", mt: 0.5 }}>
+        <Typography variant="body2" sx={{ opacity: 0.9, textAlign: "center", mt: 0.5, fontFamily: '"Josefin Sans", sans-serif' }}>
           Answer their custom questions below to exchange facts!
         </Typography>
       </Box>
@@ -109,7 +108,8 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
             elevation={2}
             sx={{
               p: 3,
-              borderLeft: "6px solid #4FD1C5",
+              borderLeft: "6px solid",
+              borderLeftColor: "primary.main",
             }}
           >
             <Box display="flex" alignItems="center" gap={1.5} mb={2}>

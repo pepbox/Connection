@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Box, Typography, TextField, IconButton, Paper, Button } from "@mui/material";
-import { Add, Delete, Save } from "@mui/icons-material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, TextField, Paper } from "@mui/material";
+import { Save } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAddCustomQuestionsMutation } from "../../../game/services/gameArena.Api";
+import { useAddCustomQuestionsMutation, useGetSessionQuery } from "../../../game/services/gameArena.Api";
 import GameHeader from "../../../../components/layout/GameHeader";
 import GlobalButton from "../../../../components/ui/button";
 
@@ -14,21 +14,30 @@ interface QuestionInput {
 const CustomQuestionsBuilder: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
+  const { data: sessionData } = useGetSessionQuery(sessionId, { skip: !sessionId });
+  const requiredCount = sessionData?.customQuestionsCount || 2;
+
   const [addCustomQuestions, { isLoading }] = useAddCustomQuestionsMutation();
   
-  const [questions, setQuestions] = useState<QuestionInput[]>([
-    { questionText: "", correctAnswer: "" }
-  ]);
+  const [questions, setQuestions] = useState<QuestionInput[]>(() =>
+    Array.from({ length: requiredCount }, () => ({ questionText: "", correctAnswer: "" }))
+  );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleAddQuestion = () => {
-    setQuestions((prev) => [...prev, { questionText: "", correctAnswer: "" }]);
-  };
-
-  const handleRemoveQuestion = (index: number) => {
-    if (questions.length === 1) return;
-    setQuestions((prev) => prev.filter((_, idx) => idx !== index));
-  };
+  useEffect(() => {
+    if (requiredCount && questions.length !== requiredCount) {
+      setQuestions((prev) => {
+        if (prev.length < requiredCount) {
+          const added = Array.from({ length: requiredCount - prev.length }, () => ({
+            questionText: "",
+            correctAnswer: "",
+          }));
+          return [...prev, ...added];
+        }
+        return prev.slice(0, requiredCount);
+      });
+    }
+  }, [requiredCount]);
 
   const handleChangeQuestion = (index: number, field: keyof QuestionInput, value: string) => {
     setQuestions((prev) => {
@@ -36,20 +45,21 @@ const CustomQuestionsBuilder: React.FC = () => {
       updated[index][field] = value;
       return updated;
     });
+    if (errorMsg) setErrorMsg(null);
   };
 
   const handleSubmit = async () => {
-    // Validate: At least 1 question must have text
-    const filledQuestions = questions.filter((q) => q.questionText.trim().length > 0);
+    // Validate: All required questions must have questionText filled
+    const invalidQuestion = questions.find((q) => q.questionText.trim().length === 0);
     
-    if (filledQuestions.length === 0) {
-      setErrorMsg("Please fill out at least one question before submitting.");
+    if (invalidQuestion || questions.length !== requiredCount) {
+      setErrorMsg(`Please fill out all ${requiredCount} question(s) before submitting.`);
       return;
     }
 
     try {
       await addCustomQuestions({
-        questions: filledQuestions.map((q) => ({
+        questions: questions.map((q) => ({
           questionText: q.questionText.trim(),
           correctAnswer: q.correctAnswer.trim() || undefined,
         }))
@@ -57,7 +67,7 @@ const CustomQuestionsBuilder: React.FC = () => {
 
       // Clear local answers cache if any
       const STORAGE_KEY = `questionnaire_answers_v2_${sessionId}`;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filledQuestions));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(questions));
       
       navigate(`/game/${sessionId}/waiting`);
     } catch (err: any) {
@@ -67,25 +77,24 @@ const CustomQuestionsBuilder: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#f5f6fa" }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#fffdf0" }}>
       <GameHeader />
       
       {/* Banner Section */}
       <Box
         sx={{
-          bgcolor: "primary.main",
+          background: "linear-gradient(135deg, #ef3349 0%, #ff7c27 100%)",
           color: "white",
           p: 4,
           pb: 8,
           textAlign: "center",
-          backgroundImage: "#A78BFA",
         }}
       >
-        <Typography variant="h4" fontWeight="bold" mb={1}>
+        <Typography variant="h4" fontWeight="bold" mb={1} sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
           Create Your Questions!
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 1, color:"#E5E4E2" }}>
-          Write fun facts or trivia questions about yourself for another player to answer.
+        <Typography variant="body2" sx={{ opacity: 0.9, color: "white", fontFamily: '"Josefin Sans", sans-serif' }}>
+          Write {requiredCount} fun facts or trivia questions about yourself for another player to answer.
         </Typography>
       </Box>
 
@@ -111,22 +120,12 @@ const CustomQuestionsBuilder: React.FC = () => {
               width: "100%",
               maxWidth: "400px",
               position: "relative",
-              // borderLeft: "5px solid #4FD1C5"
             }}
           >
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
               <Typography variant="subtitle1" fontWeight="bold" color="primary.dark">
                 Question #{index + 1}
               </Typography>
-              {questions.length > 1 && (
-                <IconButton 
-                  color="error" 
-                  onClick={() => handleRemoveQuestion(index)}
-                  sx={{ p: 0.5 }}
-                >
-                  <Delete size-sm />
-                </IconButton>
-              )}
             </Box>
 
             <TextField
@@ -134,7 +133,7 @@ const CustomQuestionsBuilder: React.FC = () => {
               multiline
               rows={2}
               variant="outlined"
-              label="The Question"
+              label={`The Question #${index + 1}`}
               placeholder="e.g. What is my secret hobby or talent?"
               value={question.questionText}
               onChange={(e) => handleChangeQuestion(index, "questionText", e.target.value)}
@@ -149,25 +148,10 @@ const CustomQuestionsBuilder: React.FC = () => {
               placeholder="e.g. Playing the Ukulele"
               value={question.correctAnswer}
               onChange={(e) => handleChangeQuestion(index, "correctAnswer", e.target.value)}
-              // helperText="This answer is kept private and not shown to guests."
               inputProps={{ maxLength: 100 }}
             />
           </Paper>
         ))}
-
-        {/* Add Question Button */}
-        <Button
-          variant="contained"
-          color="secondary"
-          onClick={handleAddQuestion}
-          startIcon={<Add />}
-          sx={{
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.15)",
-            "&:hover": { transform: "scale(1.02)" }
-          }}
-        >
-          Add new question
-        </Button>
 
         {errorMsg && (
           <Typography color="error" variant="body2" textAlign="center" sx={{ maxWidth: 300 }}>

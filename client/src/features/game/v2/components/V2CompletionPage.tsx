@@ -59,20 +59,19 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            bgcolor: "primary.main",
-            backgroundImage: "linear-gradient(135deg, #4FD1C5 0%, #3AB5A8 100%)",
+            background: "linear-gradient(135deg, #ef3349 0%, #ff7c27 100%)",
             color: "white",
             borderRadius: "16px",
             p: 4,
-            boxShadow: "0px 8px 30px rgba(79, 209, 197, 0.2)",
+            boxShadow: "0px 8px 30px rgba(239, 51, 73, 0.2)",
             position: "relative",
           }}
         >
-          <Celebration sx={{ fontSize: 60, mb: 1, color: "#FEF3C7" }} />
-          <Typography variant="h4" fontWeight="800">
+          <Celebration sx={{ fontSize: 60, mb: 1, color: "secondary.main" }} />
+          <Typography variant="h4" fontWeight="800" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
             Connected!
           </Typography>
-          <Typography variant="body1" sx={{ mt: 1, opacity: 0.95, fontWeight: "500" }}>
+          <Typography variant="body1" sx={{ mt: 1, opacity: 0.95, fontWeight: "500", fontFamily: '"Josefin Sans", sans-serif' }}>
             You and {partner.name} have successfully bonded!
           </Typography>
         </Box>
@@ -80,7 +79,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
 
       {/* Selfie Photos Grid */}
       <Paper elevation={1} sx={{ p: 3 }}>
-        <Typography variant="h6" fontWeight="bold" color="text.primary" mb={2} textAlign="center">
+        <Typography variant="h6" fontWeight="bold" color="text.primary" mb={2} textAlign="center" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
           📷 Your Connection Selfies
         </Typography>
         <Grid container spacing={2} justifyContent="center">
@@ -96,7 +95,8 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
                     aspectRatio: "1/1",
                     objectFit: "cover",
                     borderRadius: "12px",
-                    border: "3px solid #4FD1C5",
+                    border: "3px solid",
+                    borderColor: "primary.main",
                   }}
                 />
                 <Typography variant="caption" fontWeight="bold" color="text.secondary">
@@ -118,7 +118,8 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
                         aspectRatio: "1/1",
                         objectFit: "cover",
                         borderRadius: "12px",
-                        border: "2px solid #4FD1C5",
+                        border: "2px solid",
+                        borderColor: "primary.main",
                       }}
                     />
                     <Typography variant="caption" fontWeight="bold" color="text.secondary">
@@ -139,7 +140,8 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
                         aspectRatio: "1/1",
                         objectFit: "cover",
                         borderRadius: "12px",
-                        border: "2px solid #A78BFA",
+                        border: "2px solid",
+                        borderColor: "warning.main",
                       }}
                     />
                     <Typography variant="caption" fontWeight="bold" color="text.secondary">
@@ -157,7 +159,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
       <Paper elevation={1} sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
         {/* Answers to Partner Questions */}
         <Box>
-          <Typography variant="h6" fontWeight="bold" sx={{ color: "#2C7A7B" }} display="flex" alignItems="center" gap={1} mb={2}>
+          <Typography variant="h6" fontWeight="bold" sx={{ color: "primary.main", fontFamily: '"Josefin Sans", sans-serif' }} display="flex" alignItems="center" gap={1} mb={2}>
             <Quiz /> Your Answers to {partner.name}'s Questions
           </Typography>
           {partnerQuestions.length === 0 ? (
@@ -171,7 +173,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
                   key={q._id}
                   sx={{
                     p: 2,
-                    bgcolor: "rgba(79, 209, 197, 0.05)",
+                    bgcolor: "rgba(239, 51, 73, 0.05)",
                     borderRadius: "8px",
                   }}
                 >
@@ -191,7 +193,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
 
         {/* Partner Answers to My Questions */}
         <Box>
-          <Typography variant="h6" fontWeight="bold" sx={{ color: "#6B46C1" }} display="flex" alignItems="center" gap={1} mb={2}>
+          <Typography variant="h6" fontWeight="bold" sx={{ color: "warning.main", fontFamily: '"Josefin Sans", sans-serif' }} display="flex" alignItems="center" gap={1} mb={2}>
             <EmojiEmotions /> {partner.name}'s Answers to Your Questions
           </Typography>
           {myQuestions.length === 0 ? (
@@ -205,7 +207,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
                   key={q._id}
                   sx={{
                     p: 2,
-                    bgcolor: "rgba(167, 139, 250, 0.05)",
+                    bgcolor: "rgba(253, 140, 67, 0.05)",
                     borderRadius: "8px",
                   }}
                 >

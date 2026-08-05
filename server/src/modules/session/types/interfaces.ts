@@ -10,4 +10,5 @@ export interface ISession extends Document {
     gameVersion?: 'v2';
     companyName?: string;
     companyLogoUrl?: string;
+    customQuestionsCount?: number;
 }

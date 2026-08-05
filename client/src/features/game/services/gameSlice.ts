@@ -42,7 +42,7 @@ const gameSlice = createSlice({
         gameApi.endpoints.getSession.matchFulfilled,
         (state, { payload }) => {
           state.isLoading = false;
-          state.isGameStarted = payload.status === "playing";
+          state.isGameStarted = payload.status === "playing" || (payload.status as string) === "paused";
           state.sessionId = payload._id;
           state.gameVersion = 'v2';
           if (payload.status === 'ended') {

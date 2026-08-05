@@ -68,9 +68,10 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
           >
             <Card
               sx={{
-                background: "linear-gradient(135deg, #E2D8FD 0%, #C4B2FC 100%)",
-                border: "2px solid #8B7ED8",
-                boxShadow: "0 8px 32px rgba(167, 139, 250, 0.15)",
+                background: "linear-gradient(135deg, #fff5d1 0%, #ffedb8 100%)",
+                border: "2px solid",
+                borderColor: "secondary.main",
+                boxShadow: "0 8px 32px rgba(255, 207, 37, 0.15)",
                 overflow: "hidden",
                 position: "relative",
               }}
@@ -88,10 +89,10 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
                     }}
                   />
                   <Box>
-                    <Typography variant="h6" fontWeight="bold" color="#1C1C1E">
+                    <Typography variant="h6" fontWeight="bold" color="text.primary" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
                       Connect Request!
                     </Typography>
-                    <Typography variant="body2" color="#6b46c1" fontWeight="500">
+                    <Typography variant="body2" color="text.secondary" fontWeight="500" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
                       {connectionStatus.partner.name} wants to partner up with you
                     </Typography>
                   </Box>
@@ -179,7 +180,8 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
                 <Grid size={{ xs: 12 }} key={player._id}>
                   <Card
                     sx={{
-                      border: "1px solid #f0f0f0",
+                      border: "1px solid",
+                      borderColor: "divider",
                       transition: "transform 0.2s ease, box-shadow 0.2s ease",
                       "&:hover": {
                         transform: "translateY(-2px)",
@@ -192,7 +194,7 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
                         <Avatar
                           src={player.profilePhotoUrl || player.profilePhoto}
                           alt={player.name}
-                          sx={{ width: 50, height: 50, border: "2px solid #e2d8fd" }}
+                          sx={{ width: 50, height: 50, border: "2px solid", borderColor: "secondary.light" }}
                         />
                         <Box>
                           <Typography variant="body1" fontWeight="600" color="text.primary">

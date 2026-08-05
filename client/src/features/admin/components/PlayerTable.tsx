@@ -1,4 +1,4 @@
-import { Clear as ClearIcon } from "@mui/icons-material";
+import { Clear as ClearIcon, Quiz as QuizIcon } from "@mui/icons-material";
 import {
   Button,
   Chip,
@@ -17,9 +17,17 @@ import {
   Stack,
   Divider,
   TableSortLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlayerTableProps } from "../types/interfaces";
+import { useUpdateSessionMutation } from "../services/admin.Api";
+import { useAppSelector } from "../../../app/rootReducer";
+import { RootState } from "../../../app/store";
 
 type Column = {
   key: string;
@@ -30,10 +38,34 @@ type Column = {
 
 const PlayerTable: React.FC<PlayerTableProps> = ({
   players,
+  customQuestionsCount = 2,
 }) => {
   const [sortField, setSortField] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState<string>(""); // Search query state
+  
+  const { sessionId } = useAppSelector((state: RootState) => state.game);
+  const [updateSession] = useUpdateSessionMutation();
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [questionCountInput, setQuestionCountInput] = useState<number>(customQuestionsCount || 2);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    setQuestionCountInput(customQuestionsCount || 2);
+  }, [customQuestionsCount]);
+
+  const handleSaveQuestionCount = async () => {
+    if (!sessionId) return;
+    setIsUpdating(true);
+    try {
+      await updateSession({ sessionId, customQuestionsCount: Number(questionCountInput) }).unwrap();
+      setIsQuestionModalOpen(false);
+    } catch (err) {
+      console.error("Failed to update question count:", err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -199,13 +231,51 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
           placeholder="Search players by name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ minWidth: 200, flex: 1, maxWidth: 300 }}
+          sx={{
+            minWidth: 200,
+            maxWidth: 300,
+            "& .MuiOutlinedInput-root": {
+              height: "40px",
+              borderRadius: "8px",
+              fontFamily: '"Josefin Sans", sans-serif',
+            },
+          }}
           InputProps={{
             startAdornment: (
-              <Box sx={{ mr: 1, color: "text.secondary" }}>🔍</Box>
+              <Box sx={{ mr: 1, color: "text.secondary", fontSize: "0.9rem" }}>🔍</Box>
             ),
           }}
         />
+
+        {/* Configure Required Questions Count Button */}
+        <Button
+          variant="contained"
+          startIcon={<QuizIcon />}
+          onClick={() => {
+            setQuestionCountInput(customQuestionsCount || 2);
+            setIsQuestionModalOpen(true);
+          }}
+          sx={{
+            height: "40px",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            backgroundColor: "secondary.main",
+            color: "secondary.contrastText",
+            px: 2,
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 700,
+            fontSize: "0.875rem",
+            fontFamily: '"Josefin Sans", sans-serif',
+            boxShadow: "0 2px 6px rgba(255, 207, 37, 0.3)",
+            "&:hover": {
+              backgroundColor: "secondary.dark",
+              boxShadow: "0 4px 12px rgba(255, 207, 37, 0.4)",
+            },
+          }}
+        >
+          Set Questions ({customQuestionsCount || 2})
+        </Button>
         {searchQuery && (
           <Button
             size="small"
@@ -353,6 +423,70 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
           </Table>
         </TableContainer>
       )}
+
+      {/* Question Count Settings Modal */}
+      <Dialog
+        open={isQuestionModalOpen}
+        onClose={() => setIsQuestionModalOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "14px", p: 1 }
+        }}
+      >
+        <DialogTitle sx={{ fontFamily: '"Josefin Sans", sans-serif', fontWeight: 800, pb: 1 }}>
+          Set Required Questions Count
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
+            Specify how many custom questions each player must create during their game setup.
+          </Typography>
+          <TextField
+            fullWidth
+            type="number"
+            label="Required Questions per Player"
+            variant="outlined"
+            size="small"
+            value={questionCountInput}
+            onChange={(e) => setQuestionCountInput(Math.max(1, parseInt(e.target.value) || 1))}
+            inputProps={{ min: 1, max: 10 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "10px",
+              },
+              "& .MuiInputLabel-root": {
+                fontFamily: '"Josefin Sans", sans-serif',
+              },
+              "& .MuiOutlinedInput-input": { fontFamily: '"Josefin Sans", sans-serif' }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setIsQuestionModalOpen(false)}
+            sx={{ fontFamily: '"Josefin Sans", sans-serif', textTransform: "none", color: "#64748b" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveQuestionCount}
+            disabled={isUpdating}
+            startIcon={isUpdating ? <CircularProgress size={16} color="inherit" /> : null}
+            sx={{
+              fontFamily: '"Josefin Sans", sans-serif',
+              textTransform: "none",
+              backgroundColor: "secondary.main",
+              color: "secondary.contrastText",
+              boxShadow: "none",
+              borderRadius: "8px",
+              "&:hover": { backgroundColor: "secondary.dark" }
+            }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

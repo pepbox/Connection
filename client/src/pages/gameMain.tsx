@@ -6,6 +6,7 @@ import CustomQuestionsBuilder from "../features/question/v2/components/CustomQue
 import V2IntroScreen from "../features/question/v2/components/V2IntroScreen";
 import V2GameArenaPage from "../features/game/v2/pages/V2GameArenaPage";
 import { useLazyFetchPlayerQuery } from "../features/player/services/player.api";
+import { useGetSessionQuery } from "../features/game/services/gameArena.Api";
 import { RootState } from "../app/store";
 import { useEffect } from "react";
 import Loader from "../components/ui/Loader";
@@ -13,6 +14,8 @@ import AuthWrapper from "../components/auth/AuthWrapper";
 import { useAppDispatch, useAppSelector } from "../app/rootReducer";
 import { setSessionId } from "../features/game/services/gameSlice";
 import { logoutPlayer } from "../features/player/services/player.slice";
+import { Box, Typography } from "@mui/material";
+import PauseIcon from "@mui/icons-material/Pause";
 
 const GameMain = () => {
   const [fetchUser, { isUninitialized, isLoading: isUserLoading }] = useLazyFetchPlayerQuery();
@@ -21,6 +24,10 @@ const GameMain = () => {
   );
   const dispatch = useAppDispatch();
   const sessionId = useParams<{ sessionId: string }>().sessionId;
+
+  const { data: sessionData } = useGetSessionQuery(sessionId as string, {
+    skip: !sessionId,
+  });
 
   useEffect(() => {
     dispatch(setSessionId(sessionId ?? ""));
@@ -48,6 +55,63 @@ const GameMain = () => {
   if (isUninitialized || isUserLoading) {
     return <Loader />;
   }
+
+  if ((sessionData?.status as string) === "paused") {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#fffdf0",
+          px: 3,
+          py: 4,
+          textAlign: "center"
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "80px",
+            height: "80px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(252, 166, 30, 0.15)",
+            color: "#FCA61E",
+            mb: 4,
+            animation: "pulse 2s infinite ease-in-out",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(252, 166, 30, 0.4)" },
+              "70%": { transform: "scale(1.05)", boxShadow: "0 0 0 12px rgba(252, 166, 30, 0)" },
+              "100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgba(252, 166, 30, 0)" }
+            }
+          }}
+        >
+          <PauseIcon sx={{ fontSize: 44 }} />
+        </Box>
+        <Typography
+          variant="h4"
+          fontWeight="bold"
+          color="text.primary"
+          sx={{ fontFamily: '"Josefin Sans", sans-serif', mb: 2 }}
+        >
+          Game Paused
+        </Typography>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ fontFamily: '"Josefin Sans", sans-serif', maxWidth: "340px", mx: "auto" }}
+        >
+          The game organizer has paused the session. Please stand by, the game will resume shortly.
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <div
       style={{

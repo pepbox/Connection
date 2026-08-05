@@ -5,6 +5,7 @@ import AppError from "../../../../utils/appError";
 import { Player } from "../../models/player.model";
 import { CustomQuestion } from "../../../questions/models/customQuestion.model";
 import { Connection } from "../../models/connection.model";
+import { Session } from "../../../session/models/session.model";
 import FileService from "../../../files/services/fileService";
 import { SessionEmitters } from "../../../../services/socket/sessionEmitters";
 import { Events } from "../../../../services/socket/enums/Events";
@@ -26,8 +27,17 @@ export const addCustomQuestions = async (
       return next(new AppError("User ID and Session ID are required", 400));
     }
 
-    if (!Array.isArray(questions) || questions.length < 1) {
-      return next(new AppError("At least one question is required", 400));
+    const sessionDoc = await Session.findById(sessionId);
+    const requiredCount = sessionDoc?.customQuestionsCount || 2;
+
+    if (!Array.isArray(questions) || questions.length !== requiredCount) {
+      return next(new AppError(`You must provide exactly ${requiredCount} question(s)`, 400));
+    }
+
+    for (const q of questions) {
+      if (!q.questionText || typeof q.questionText !== "string" || !q.questionText.trim()) {
+        return next(new AppError("All questions must have valid text", 400));
+      }
     }
 
     // Delete existing custom questions for this player

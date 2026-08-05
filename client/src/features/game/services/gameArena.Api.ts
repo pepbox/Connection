@@ -12,13 +12,14 @@ export interface Player {
 export interface Session {
   _id: string;
   name: string;
-  status: "pending" | "playing" | "ended";
+  status: "pending" | "playing" | "paused" | "ended";
   createdAt: string;
   updatedAt: string;
   __v: number;
   gameVersion: string;
   companyName?: string;
   companyLogoUrl?: string;
+  customQuestionsCount?: number;
 }
 
 export const gameApi = api.injectEndpoints({

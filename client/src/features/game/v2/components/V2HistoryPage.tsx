@@ -57,7 +57,7 @@ const V2HistoryPage: React.FC = () => {
                       <Avatar
                         src={conn.partner?.profilePhoto}
                         alt={conn.partner?.name}
-                        sx={{ width: 50, height: 50, border: "2px solid #4FD1C5" }}
+                        sx={{ width: 50, height: 50, border: "2px solid", borderColor: "primary.main" }}
                       />
                       <Box>
                         <Typography variant="h6" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
@@ -77,7 +77,7 @@ const V2HistoryPage: React.FC = () => {
                     <Box mt={3} display="flex" flexDirection="column" gap={3}>
                       {/* Your Responses */}
                       <Box>
-                        <Typography variant="subtitle1" sx={{ color: "#2C7A7B" }} fontWeight="bold" mb={2}>
+                        <Typography variant="subtitle1" sx={{ color: "primary.main" }} fontWeight="bold" mb={2}>
                           Your Responses
                         </Typography>
                         <Box display="flex" flexDirection="column" gap={2}>
@@ -88,7 +88,7 @@ const V2HistoryPage: React.FC = () => {
                                 key={ans.questionId}
                                 sx={{
                                   p: 2,
-                                  bgcolor: "rgba(79, 209, 197, 0.05)",
+                                  bgcolor: "rgba(239, 51, 73, 0.05)",
                                   borderRadius: "8px",
                                 }}
                               >
@@ -106,7 +106,7 @@ const V2HistoryPage: React.FC = () => {
 
                       {/* Partner Responses */}
                       <Box>
-                        <Typography variant="subtitle1" sx={{ color: "#6B46C1" }} fontWeight="bold" mb={2}>
+                        <Typography variant="subtitle1" sx={{ color: "warning.main" }} fontWeight="bold" mb={2}>
                           {conn.partner?.name}'s Responses
                         </Typography>
                         <Box display="flex" flexDirection="column" gap={2}>
@@ -117,7 +117,7 @@ const V2HistoryPage: React.FC = () => {
                                 key={ans.questionId}
                                 sx={{
                                   p: 2,
-                                  bgcolor: "rgba(167, 139, 250, 0.05)",
+                                  bgcolor: "rgba(253, 140, 67, 0.05)",
                                   borderRadius: "8px",
                                 }}
                               >

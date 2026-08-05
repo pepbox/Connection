@@ -11,8 +11,7 @@ export interface AdminUser {
 
 export interface PlayerTableProps {
     players: Player[];
-    gameStatus: string;
-    transaction?: boolean;
+    customQuestionsCount?: number;
     onChangeName?: (playerId: string, name: string) => void;
     onChangeScore?: (playerId: string, newScore: number) => void;
     onViewResponses?: (playerId: string) => void;
@@ -42,6 +41,7 @@ export interface HeaderData {
     activeVersion?: 'v1' | 'v2' | null;
     companyName?: string;
     companyLogoUrl?: string;
+    customQuestionsCount?: number;
 }
 
 export interface Player {
@@ -66,9 +66,9 @@ export interface DashboardHeaderProps {
     data: HeaderData;
     gameStatus?: boolean;
     onGameStatusChange?: (version: 'v1' | 'v2' | 'both') => void;
-    onTransactionsChange?: (status: boolean) => void;
-    transaction?: boolean;
     isCheckingReadiness?: boolean;
+    onPauseGame?: () => void;
+    onResumeGame?: () => void;
 }
 
 

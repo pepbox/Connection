@@ -193,7 +193,7 @@ const AdminLogin: React.FC = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        bgcolor: "#f5f5f5",
+        bgcolor: "#fffdf0",
         px: { xs: 2, sm: 3 },
         py: { xs: 2, sm: 0 },
       }}
@@ -205,7 +205,7 @@ const AdminLogin: React.FC = () => {
             borderRadius: { xs: 3, sm: 4 },
             p: { xs: 4, sm: 6 },
             textAlign: "center",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
             maxWidth: { xs: "100%", sm: 400 },
             mx: "auto",
             width: "100%",
@@ -226,8 +226,9 @@ const AdminLogin: React.FC = () => {
               component="h1"
               sx={{
                 mb: { xs: 3, sm: 4 },
-                fontWeight: 600,
-                color: "#333",
+                fontWeight: 800,
+                color: "text.primary",
+                fontFamily: '"Josefin Sans", sans-serif',
                 fontSize: { xs: "1.75rem", sm: "2.125rem" },
               }}
             >
@@ -237,7 +238,8 @@ const AdminLogin: React.FC = () => {
               variant="body2"
               sx={{
                 mb: 3,
-                color: "#666",
+                color: "text.secondary",
+                fontFamily: '"Josefin Sans", sans-serif',
                 fontSize: { xs: "0.85rem", sm: "0.9rem" },
               }}
             >
@@ -288,7 +290,7 @@ const AdminLogin: React.FC = () => {
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2,
                       "&.Mui-focused fieldset": {
-                        borderColor: "#007bff",
+                        borderColor: "primary.main",
                         borderWidth: 2,
                       },
                     },

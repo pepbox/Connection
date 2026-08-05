@@ -172,7 +172,7 @@ const V2IntroScreen: React.FC = () => {
                       bgcolor: isActive
                         ? "#FFFFFF"
                         : isViewed
-                        ? "#4FD1C5"
+                        ? "secondary.main"
                         : "rgba(255,255,255,0.3)",
                       transition: "all 0.3s ease",
                       "&:hover": {

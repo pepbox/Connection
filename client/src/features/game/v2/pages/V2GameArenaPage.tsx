@@ -116,7 +116,8 @@ const V2GameArenaPage: React.FC = () => {
                   sx={{
                     width: 90,
                     height: 90,
-                    border: "3px solid #4FD1C5",
+                    border: "3px solid",
+                    borderColor: "primary.main",
                     boxShadow: "0px 4px 15px rgba(0,0,0,0.1)",
                   }}
                 />
@@ -202,7 +203,8 @@ const V2GameArenaPage: React.FC = () => {
                     sx={{
                       width: 90,
                       height: 90,
-                      border: "3px solid #4FD1C5",
+                      border: "3px solid",
+                      borderColor: "primary.main",
                     }}
                   />
 
@@ -285,7 +287,8 @@ const V2GameArenaPage: React.FC = () => {
                         height: 140,
                         objectFit: "cover",
                         borderRadius: 3,
-                        border: "3px solid #4FD1C5",
+                        border: "3px solid",
+                        borderColor: "primary.main",
                       }}
                     />
                   )}

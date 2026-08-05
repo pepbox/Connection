@@ -253,6 +253,7 @@ export const fetchAdminDashboardData = async (
                 gameVersion: session.gameVersion || "v2",
                 companyName: session.companyName,
                 companyLogoUrl: session.companyLogoUrl,
+                customQuestionsCount: session.customQuestionsCount || 2,
             },
             players: playersData,
         };
@@ -351,9 +352,9 @@ export const checkPlayersReadiness = async (
             return next(new AppError("Session ID and Admin ID are required.", 400));
         }
 
-        // Fetch the session to determine the game version
+        // Fetch the session to determine the game version and required question count
         const session = await sessionService.fetchSessionById(sessionId);
-        const gameVersion = session?.gameVersion || "v1";
+        const requiredCount = session?.customQuestionsCount || 2;
 
         // Fetch all players in the session
         const players = await playerService.getPlayersBySession(sessionId);
@@ -361,12 +362,12 @@ export const checkPlayersReadiness = async (
         const pendingPlayers = [];
         
         for (const player of players) {
-            const customQuestionsCount = await CustomQuestion.countDocuments({
+            const playerQuestionsCount = await CustomQuestion.countDocuments({
                 player: player._id,
                 session: sessionId
             });
 
-            if (customQuestionsCount === 0) {
+            if (playerQuestionsCount < requiredCount) {
                 let teamNumber = 1;
                 try {
                     if (player?.team) {
@@ -380,7 +381,7 @@ export const checkPlayersReadiness = async (
                     id: player._id.toString(),
                     name: player.name,
                     team: teamNumber,
-                    questionsAnswered: "0 custom questions"
+                    questionsAnswered: `${playerQuestionsCount}/${requiredCount} questions`
                 });
             }
         }

@@ -25,6 +25,11 @@ const sessionSchema = new Schema<ISession>({
     },
     companyLogoUrl: {
         type: String
+    },
+    customQuestionsCount: {
+        type: Number,
+        default: 2,
+        min: 1
     }
 }, {
     timestamps: true

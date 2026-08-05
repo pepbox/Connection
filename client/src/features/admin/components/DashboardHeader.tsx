@@ -3,8 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Switch,
-  FormControlLabel,
   Button,
   CircularProgress,
   TextField,
@@ -39,9 +37,9 @@ import { clearAdmin } from "../services/adminSlice";
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   data,
   onGameStatusChange,
-  onTransactionsChange,
-  transaction = false, // Default value for transaction
   isCheckingReadiness = false, // Default value for checking readiness
+  onPauseGame,
+  onResumeGame,
 }) => {
   const [AdminLogout] = useAdminLogoutMutation();
   const [downloadSessionSelfies] = useDownloadSessionSelfiesMutation();
@@ -256,8 +254,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
 
           <Box display="flex" flexDirection="column" gap={2} sx={{ width: "100%" }}>
             {/* Controls & Actions */}
-            <Box display="flex" gap={3} alignItems="center" flexWrap="wrap" justifyContent="center">
-              {data?.gameStatus !== "playing" && data?.gameStatus !== "ended" ? (
+             <Box display="flex" gap={3} alignItems="center" flexWrap="wrap" justifyContent="center">
+              {data?.gameStatus !== "playing" && data?.gameStatus !== "ended" && data?.gameStatus !== "paused" ? (
                 <GlobalButton
                   fullWidth={false}
                   disabled={isCheckingReadiness}
@@ -272,28 +270,39 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 </GlobalButton>
               ) : (
                 <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
-                  <Box sx={{ py: 1, px: 2, bgcolor: "secondary.light", borderRadius: 2, border: "1px solid #4FD1C5" }}>
+                  {data?.gameStatus === "playing" && (
+                    <GlobalButton
+                      fullWidth={false}
+                      onClick={() => onPauseGame?.()}
+                      sx={{
+                        bgcolor: "secondary.main",
+                        color: "#FFFFFF",
+                        "&:hover": { bgcolor: "secondary.dark" },
+                      }}
+                    >
+                      Pause Game
+                    </GlobalButton>
+                  )}
+                  {data?.gameStatus === "paused" && (
+                    <GlobalButton
+                      fullWidth={false}
+                      onClick={() => onResumeGame?.()}
+                      sx={{
+                        bgcolor: "secondary.main",
+                        color: "#FFFFFF",
+                        "&:hover": { bgcolor: "secondary.dark" },
+                      }}
+                    >
+                      Resume Game
+                    </GlobalButton>
+                  )}
+                  {/* <Box sx={{ py: 1, px: 2, bgcolor: "secondary.light", borderRadius: 2, border: "1px solid #4FD1C5" }}>
                     <Typography variant="body1" fontWeight="bold" color="text.primary">
-                      Active Mode: Konnect Game
+                      Active Mode: Konnect Game ({data?.gameStatus === "paused" ? "PAUSED" : "PLAYING"})
                     </Typography>
-                  </Box>
+                  </Box> */}
                 </Box>
               )}
-
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={transaction}
-                    onChange={(e) => onTransactionsChange?.(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label={
-                  <Typography variant="body2" color="text.secondary">
-                    Enable Transactions
-                  </Typography>
-                }
-              />
             </Box>
           </Box>
         </Paper>
@@ -417,13 +426,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "10px",
-                "& fieldset": { borderColor: "rgba(0,0,0,0.12)" },
-                "&:hover fieldset": { borderColor: "#4FD1C5" },
-                "&.Mui-focused fieldset": { borderColor: "#4FD1C5" }
               },
               "& .MuiInputLabel-root": {
                 fontFamily: '"Josefin Sans", sans-serif',
-                "&.Mui-focused": { color: "#4FD1C5" }
               },
               "& .MuiOutlinedInput-input": { fontFamily: '"Josefin Sans", sans-serif' }
             }}
@@ -433,7 +438,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <Box
             sx={{
               border: "2px dashed",
-              borderColor: selectedLogo || data?.companyLogoUrl ? "#4FD1C5" : "rgba(45, 43, 41, 0.2)",
+              borderColor: selectedLogo || data?.companyLogoUrl ? "primary.main" : "rgba(45, 43, 41, 0.2)",
               borderRadius: "12px",
               height: "120px",
               display: "flex",
@@ -446,7 +451,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               overflow: "hidden",
               transition: "all 0.2s ease-in-out",
               "&:hover": {
-                borderColor: "#4FD1C5",
+                borderColor: "primary.main",
                 backgroundColor: "rgba(0, 0, 0, 0.04)",
               }
             }}
@@ -538,10 +543,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             sx={{
               fontFamily: '"Josefin Sans", sans-serif',
               textTransform: "none",
-              backgroundColor: "#4FD1C5",
+              backgroundColor: "secondary.main",
+              color: "secondary.contrastText",
               boxShadow: "none",
               borderRadius: "8px",
-              "&:hover": { backgroundColor: "#3dbbb0" }
+              "&:hover": { backgroundColor: "secondary.dark" }
             }}
           >
             Save

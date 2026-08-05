@@ -32,7 +32,7 @@ const GlobalButton: React.FC<GlobalButtonProps> = ({
       startIcon={startIcon}
       sx={{
         bgcolor: !disabled ? "secondary.main" : "rgba(142, 142, 147, 1)",
-        color: "#FFFFFF !important",
+        color: !disabled ? "secondary.contrastText" : "rgba(255, 255, 255, 0.6)",
         ...sx,
       }}
     >

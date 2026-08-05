@@ -96,14 +96,13 @@ const ConnectionSelfieScreen: React.FC<ConnectionSelfieScreenProps> = ({
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        bgcolor: "#f5f6fa",
+        bgcolor: "#fffdf0",
       }}
     >
       {/* Top Banner - Partner Info */}
       <Box
         sx={{
-          bgcolor: "primary.main",
-          backgroundImage: "linear-gradient(135deg, #A78BFA 0%, #764ba2 100%)",
+          background: "linear-gradient(135deg, #ef3349 0%, #ff7c27 100%)",
           color: "white",
           py: 4,
           px: 3,
@@ -114,7 +113,7 @@ const ConnectionSelfieScreen: React.FC<ConnectionSelfieScreenProps> = ({
           gap: 1.5,
           borderBottomLeftRadius: "24px",
           borderBottomRightRadius: "24px",
-          boxShadow: "0px 4px 20px rgba(167, 139, 250, 0.2)",
+          boxShadow: "0px 4px 20px rgba(239, 51, 73, 0.2)",
         }}
       >
         <Avatar
@@ -230,9 +229,9 @@ const ConnectionSelfieScreen: React.FC<ConnectionSelfieScreenProps> = ({
               variant="outlined"
               sx={{
                 flex: 1,
-                borderColor: "#6B7280",
-                color: "#1C1C1E",
-                "&:hover": { borderColor: "#1C1C1E" },
+                borderColor: "text.primary",
+                color: "text.primary",
+                "&:hover": { borderColor: "text.primary" },
               }}
             >
               Retake
@@ -252,9 +251,9 @@ const ConnectionSelfieScreen: React.FC<ConnectionSelfieScreenProps> = ({
               variant="outlined"
               sx={{
                 flex: 1,
-                borderColor: "#6B7280",
-                color: "#1C1C1E",
-                "&:hover": { borderColor: "#1C1C1E" },
+                borderColor: "text.primary",
+                color: "text.primary",
+                "&:hover": { borderColor: "text.primary" },
               }}
             >
               <CloudUpload sx={{ fontSize: 16, mr: 1 }} />
