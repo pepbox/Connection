@@ -61,7 +61,7 @@ export default class SessionService {
     }
     const sessionDoc = await Session.findByIdAndUpdate(
       sessionId,
-      updateData,
+      { $set: updateData },
       options
     );
     if (!sessionDoc) {

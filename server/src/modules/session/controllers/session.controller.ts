@@ -34,7 +34,8 @@ export const updateSession = async (
 ) => {
   try {
     const sessionId = req.user?.sessionId;
-    const updateData: Partial<ISession> = req.body;
+    // Destructure sessionId out so it's not accidentally written to the DB
+    const { sessionId: _ignored, ...updateData } = req.body as Partial<ISession> & { sessionId?: string };
 
     if (!sessionId) {
       return next(new AppError("Session ID is required.", 400));
