@@ -105,7 +105,7 @@ const DashboardPage: React.FC = () => {
     },
   };
 
-  if (isError) {
+  if (isError && !data) {
     return <ErrorLayout />;
   }
   return (

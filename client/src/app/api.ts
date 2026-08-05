@@ -12,9 +12,10 @@ const baseQuery = fetchBaseQuery({
     credentials: "include", // Include credentials for cross-origin requests
     prepareHeaders: (headers) => {
         // Fallback token authentication in case cookies are blocked (e.g. on Safari/mobile)
-        const token =
-            localStorage.getItem("adminToken") ||
-            localStorage.getItem("playerToken");
+        const isAdmin = typeof window !== "undefined" && window.location.pathname.includes("/admin");
+        const token = isAdmin
+            ? localStorage.getItem("adminToken")
+            : localStorage.getItem("playerToken");
 
         if (token) {
             headers.set("Authorization", `Bearer ${token}`);
@@ -74,9 +75,10 @@ const baseQueryWithReauth: BaseQueryFn<
     ) {
         console.warn("Access token expired. Attempting refresh...");
 
-        const refreshToken =
-            localStorage.getItem("adminRefreshToken") ||
-            localStorage.getItem("playerRefreshToken");
+        const isAdmin = typeof window !== "undefined" && window.location.pathname.includes("/admin");
+        const refreshToken = isAdmin
+            ? localStorage.getItem("adminRefreshToken")
+            : localStorage.getItem("playerRefreshToken");
 
         // Try to refresh the token
         const refreshResult = await baseQuery(
@@ -93,22 +95,29 @@ const baseQueryWithReauth: BaseQueryFn<
             console.log("Token refreshed successfully. Retrying original request...");
             const newToken = (refreshResult.data as any)?.data?.token;
             if (newToken) {
-                api.dispatch({ type: "Player/setPlayerToken", payload: { token: newToken } });
-                api.dispatch({ type: "admin/setToken", payload: { token: newToken } });
+                if (isAdmin) {
+                    api.dispatch({ type: "admin/setToken", payload: { token: newToken } });
+                } else {
+                    api.dispatch({ type: "Player/setPlayerToken", payload: { token: newToken } });
+                }
             }
             // Retry the original query
             result = await customBaseQuery(args, api, extraOptions);
         } else {
             console.warn("Refresh token invalid or expired. Logging out.");
             
-            // Dispatch logout actions to clean up store
-            api.dispatch({ type: "Player/logoutPlayer" });
-            api.dispatch({ type: "admin/clearAdmin" });
-
-            // Clear storage
-            if (typeof window !== "undefined") {
-                localStorage.clear();
-                sessionStorage.clear();
+            // Dispatch logout actions to clean up store and storage selectively
+            if (isAdmin) {
+                api.dispatch({ type: "admin/clearAdmin" });
+                localStorage.removeItem("adminToken");
+                localStorage.removeItem("adminRefreshToken");
+            } else {
+                api.dispatch({ type: "Player/logoutPlayer" });
+                localStorage.removeItem("playerToken");
+                localStorage.removeItem("playerRefreshToken");
+                if (typeof window !== "undefined") {
+                    sessionStorage.clear();
+                }
             }
         }
     }

@@ -22,7 +22,7 @@ const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { sessionId } = useAppSelector((state: RootState) => state.game);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Redux state
   const isAuthenticated = useSelector((state: RootState) =>
@@ -175,7 +175,12 @@ const AdminLogin: React.FC = () => {
 
       // Clear PIN on error and focus first input
       setPin(["", "", "", ""]);
-      setHasAutoLoggedIn(false);
+      
+      // Clean up search params to prevent infinite redirect loops
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("pin");
+      setSearchParams(newParams);
+
       if (inputRefs.current[0]) {
         inputRefs.current[0].focus();
       }

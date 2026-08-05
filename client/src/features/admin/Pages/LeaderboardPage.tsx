@@ -6,7 +6,7 @@ import ErrorLayout from "../../../components/ui/Error";
 const LeaderboardPage: React.FC = () => {
   const { data, isLoading, isError } = useFetchLeaderboardDataQuery({});
 
-  if (isError) {
+  if (isError && !data) {
     return <ErrorLayout />;
   }
 

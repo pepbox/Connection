@@ -28,6 +28,7 @@ import {
   useUploadSessionLogoMutation,
   useUpdateSessionMutation
 } from "../services/admin.Api";
+import konnectLogo from "../../../assets/Konnect-Logo.webp";
 import GlobalButton from "../../../components/ui/button";
 import { useAppDispatch, useAppSelector } from "../../../app/rootReducer";
 import { RootState } from "../../../app/store";
@@ -348,7 +349,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 height: 72,
                 borderRadius: "18px",
                 boxShadow: "0px 8px 16px rgba(30, 58, 138, 0.15)",
-                backgroundColor: data?.companyLogoUrl ? "transparent" : "#1e3a8a",
+                backgroundColor: "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -356,17 +357,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                 border: "1px solid rgba(0, 0, 0, 0.05)"
               }}
             >
-              {data?.companyLogoUrl ? (
-                <img
-                  src={data.companyLogoUrl}
-                  alt="Logo"
-                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                />
-              ) : (
-                <Typography variant="h5" sx={{ color: "#fff", fontWeight: "bold", fontFamily: '"Josefin Sans", sans-serif' }}>
-                  {(data?.companyName || "K").charAt(0).toUpperCase()}
-                </Typography>
-              )}
+              <img
+                src={data?.companyLogoUrl || konnectLogo}
+                alt="Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
             </Box>
 
             {/* Text Stack */}

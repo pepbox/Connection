@@ -109,9 +109,9 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
       if (sortField === "customQuestionsCreated") {
         aValue = a.v2?.customQuestionsCreated || 0;
         bValue = b.v2?.customQuestionsCreated || 0;
-      } else if (sortField === "partnerName") {
-        aValue = a.v2?.partnerName || "";
-        bValue = b.v2?.partnerName || "";
+      } else if (sortField === "connectedTeammatesCount") {
+        aValue = a.v2?.connectedTeammatesCount || 0;
+        bValue = b.v2?.connectedTeammatesCount || 0;
       } else if (sortField === "customAnswersSubmitted") {
         aValue = a.v2?.customAnswersSubmitted || 0;
         bValue = b.v2?.customAnswersSubmitted || 0;
@@ -169,28 +169,24 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
       },
     },
     {
-      key: "partnerName",
-      label: "Connected Teammate",
+      key: "connectedTeammatesCount",
+      label: "No. of Connected Teammates",
       sortable: true,
       render: (player) => {
-        const partner = player.v2?.partnerName || "None";
+        const count = player.v2?.connectedTeammatesCount || 0;
         return (
           <Typography
             variant="body2"
-            fontWeight={
-              partner !== "None" && partner !== "Pending connection"
-                ? "bold"
-                : "regular"
-            }
+            fontWeight={count > 0 ? "bold" : "regular"}
           >
-            {partner}
+            {count}
           </Typography>
         );
       },
     },
     {
       key: "customAnswersSubmitted",
-      label: "Teammate's Questions Answered",
+      label: "No. of Questions Answered",
       sortable: true,
       render: (player) => {
         const count = player.v2?.customAnswersSubmitted || 0;

@@ -15,6 +15,7 @@ import { RootState } from "../../../app/store";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import homescreenLottie from "../../../assets/LogInPage-animation.lottie";
 import { useGetSessionQuery } from "../../game/services/gameArena.Api";
+import konnectLogo from "../../../assets/Konnect-Logo.webp";
 
 const HomeScreen: React.FC = () => {
   const { isAuthenticated } = useAppSelector(
@@ -101,11 +102,9 @@ const HomeScreen: React.FC = () => {
         boxSizing: "border-box",
       }}
     >
-      {sessionData?.companyLogoUrl && (
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
-          <img src={sessionData.companyLogoUrl} alt="Company Logo" style={{ maxHeight: '100px', maxWidth: '100%', objectFit: 'contain' }} />
-        </Box>
-      )}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+        <img src={sessionData?.companyLogoUrl || konnectLogo} alt="Company Logo" style={{ maxHeight: '100px', maxWidth: '100%', objectFit: 'contain' }} />
+      </Box>
 
       <Typography
         variant="h1"

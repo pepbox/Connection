@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../app/hooks";
 import { RootState } from "../../app/store";
 import { useGetSessionQuery } from "../../features/game/services/gameArena.Api";
+import konnectLogo from "../../assets/Konnect-Logo.webp";
 
 interface GameHeaderProps {
   title?: string;
@@ -33,13 +34,11 @@ const GameHeader: React.FC<GameHeaderProps> = ({ title }) => {
         <IconButton onClick={() => navigate(-1)} sx={{ p: 0.5 }}>
           <ArrowBack />
         </IconButton>
-        {sessionData?.companyLogoUrl && (
-          <img 
-            src={sessionData.companyLogoUrl} 
-            alt="Logo" 
-            style={{ height: '30px', marginLeft: '8px', objectFit: 'contain' }} 
-          />
-        )}
+        <img 
+          src={sessionData?.companyLogoUrl || konnectLogo} 
+          alt="Logo" 
+          style={{ height: '30px', marginLeft: '8px', objectFit: 'contain' }} 
+        />
       </Box>
       <Typography
         variant="h6"

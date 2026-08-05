@@ -6,7 +6,7 @@ import CustomQuestionsBuilder from "../features/question/v2/components/CustomQue
 import V2IntroScreen from "../features/question/v2/components/V2IntroScreen";
 import V2GameArenaPage from "../features/game/v2/pages/V2GameArenaPage";
 import { useLazyFetchPlayerQuery } from "../features/player/services/player.api";
-import { useGetSessionQuery } from "../features/game/services/gameArena.Api";
+import { useGetSessionQuery, usePlayerLogoutMutation } from "../features/game/services/gameArena.Api";
 import { RootState } from "../app/store";
 import { useEffect } from "react";
 import Loader from "../components/ui/Loader";
@@ -19,6 +19,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 
 const GameMain = () => {
   const [fetchUser, { isUninitialized, isLoading: isUserLoading }] = useLazyFetchPlayerQuery();
+  const [playerLogout] = usePlayerLogoutMutation();
   const { isAuthenticated, player } = useAppSelector(
     (state: RootState) => state.player
   );
@@ -47,10 +48,11 @@ const GameMain = () => {
 
       if (playerSessionId !== sessionId.toString()) {
         console.warn("Session ID mismatch! Logging out player from current session view.");
+        playerLogout();
         dispatch(logoutPlayer());
       }
     }
-  }, [isAuthenticated, player, sessionId, dispatch]);
+  }, [isAuthenticated, player, sessionId, dispatch, playerLogout]);
 
   if (isUninitialized || isUserLoading) {
     return <Loader />;

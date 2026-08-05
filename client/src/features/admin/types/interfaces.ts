@@ -56,7 +56,7 @@ export interface Player {
     team?: string | number;
     v2?: {
         customQuestionsCreated?: number;
-        partnerName?: string;
+        connectedTeammatesCount?: number;
         customAnswersSubmitted?: number;
         selfieUploaded?: boolean;
     };

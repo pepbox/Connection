@@ -45,14 +45,14 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
   return (
     <Box>
       <Typography
-        variant="h5"
+        variant="h3"
         fontWeight="bold"
         mb={3}
         textAlign="center"
         color="primary"
         sx={{ fontFamily: '"Josefin Sans", sans-serif' }}
       >
-        📸 Photo Gallery ({selfies.length})
+        Photo Gallery
       </Typography>
       <Box
         sx={{
@@ -60,9 +60,9 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
           gridTemplateColumns: {
             xs: "repeat(2, 1fr)",
             sm: "repeat(3, 1fr)",
-            md: "repeat(3, 1fr)",
-            lg: "repeat(4, 1fr)",
-            xl: "repeat(4, 1fr)",
+            md: "repeat(4, 1fr)",
+            lg: "repeat(6, 1fr)",
+            xl: "repeat(6, 1fr)",
           },
           gap: {
             xs: 1.5,
@@ -76,10 +76,16 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
             key={selfie.id}
             sx={{
               borderRadius: "12px",
+              border: "none",
+              borderBottom: "none",
+              boxShadow: "none",
+              overflow: "hidden",
               transition: "transform 0.2s ease-in-out",
               "&:hover": {
                 transform: "scale(1.05)",
                 boxShadow: "0 8px 16px rgba(0,0,0,0.15)",
+                border: "none",
+                borderBottom: "none",
               },
             }}
           >
@@ -104,7 +110,7 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
                 target.src = "/placeholder-selfie.jpg";
               }}
             />
-            <CardContent sx={{ p: 2, textAlign: "center" }}>
+            <CardContent sx={{ p: 1.25, "&:last-child": { pb: 1.25 }, textAlign: "center" }}>
               {/* Simple player names display */}
               <Box
                 sx={{
@@ -140,7 +146,7 @@ const SelfiesGallery: React.FC<SelfiesGalleryProps> = ({ selfies }) => {
                     width: "100%",
                     height: "1px",
                     backgroundColor: "#e0e0e0",
-                    my: 1,
+                    my: 0.5,
                   }}
                 />
                 

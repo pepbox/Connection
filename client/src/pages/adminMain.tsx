@@ -3,7 +3,7 @@ import DashboardPage from "../features/admin/Pages/DshboardPage";
 import LeaderboardPage from "../features/admin/Pages/LeaderboardPage";
 import AdminLogin from "../features/admin/Pages/AdminLogin";
 import Box from "@mui/material/Box";
-import { useLazyFetchAdminQuery } from "../features/admin/services/admin.Api";
+import { useLazyFetchAdminQuery, useAdminLogoutMutation } from "../features/admin/services/admin.Api";
 import { useAppSelector } from "../app/hooks";
 import { RootState } from "../app/store";
 import { useEffect } from "react";
@@ -15,6 +15,7 @@ import { clearAdmin } from "../features/admin/services/adminSlice";
 
 const AdminMain = () => {
   const [FetchAdmin, { isUninitialized, isLoading: isAdminLoading }] = useLazyFetchAdminQuery();
+  const [adminLogout] = useAdminLogoutMutation();
   const { isAuthenticated, admin } = useAppSelector(
     (state: RootState) => state.admin
   );
@@ -39,10 +40,11 @@ const AdminMain = () => {
 
       if (adminSessionId !== sessionId.toString()) {
         console.warn("Session ID mismatch! Logging out admin from current session view.");
+        adminLogout();
         dispatch(clearAdmin());
       }
     }
-  }, [isAuthenticated, admin, sessionId, dispatch]);
+  }, [isAuthenticated, admin, sessionId, dispatch, adminLogout]);
 
   if (isUninitialized || isAdminLoading) {
     return <Loader />;

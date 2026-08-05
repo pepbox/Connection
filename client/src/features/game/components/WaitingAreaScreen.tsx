@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import waitingVideo from "../../../assets/Waiting-lobby-animation.webm";
+import konnectLogo from "../../../assets/Konnect-Logo.webp";
 
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../../app/hooks";
@@ -39,12 +40,10 @@ const WaitingAreaScreen: React.FC = () => {
         margin: "0 auto",
       }}
     >
-      {sessionData?.companyLogoUrl && (
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
-          <img src={sessionData.companyLogoUrl} alt="Company Logo" style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }} />
-        </Box>
-      )}
-      <Typography variant="h3" mt={sessionData?.companyLogoUrl ? 0 : 4} color="primary.main" fontWeight="800">
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
+        <img src={sessionData?.companyLogoUrl || konnectLogo} alt="Company Logo" style={{ maxHeight: '80px', maxWidth: '100%', objectFit: 'contain' }} />
+      </Box>
+      <Typography variant="h3" color="primary.main" fontWeight="800">
         {sessionData?.companyName || "Konnect"}
       </Typography>
       <Box
