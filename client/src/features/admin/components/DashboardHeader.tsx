@@ -143,16 +143,18 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     <>
       <Box
         display="flex"
+        flexDirection={{ xs: "column", md: "row" }}
+        gap={{ xs: 1.5, md: 0 }}
         justifyContent="space-between"
-        alignItems="center"
-        px={4}
+        alignItems={{ xs: "stretch", md: "center" }}
+        px={{ xs: 2, sm: 4 }}
         py={2}
       >
-        <Typography variant="h6" fontWeight="bold">
+        <Typography variant="h6" fontWeight="bold" textAlign={{ xs: "center", md: "left" }}>
           Admin Dashboard
         </Typography>
 
-        <Box display="flex" gap={2} alignItems="center">
+        <Box display="flex" gap={{ xs: 1, sm: 2 }} alignItems="center" justifyContent={{ xs: "center", md: "flex-end" }}>
           <Button
             variant="outlined"
             color="success"
@@ -167,7 +169,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           >
             <Box
               sx={{
-                display: { xs: "none", sm: "inline" },
+                display: { xs: "none", md: "inline" },
               }}
             >
               {isDownloading ? 'Downloading...' : 'Download Data'}
@@ -187,7 +189,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           >
             <Box
               sx={{
-                display: { xs: "none", sm: "inline" },
+                display: { xs: "none", md: "inline" },
               }}
             >
               Players Selfie 
@@ -209,7 +211,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           >
             <Box
               sx={{
-                display: { xs: "none", sm: "inline" },
+                display: { xs: "none", md: "inline" },
               }}
             >
               Log Out
@@ -217,12 +219,12 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           </Button>
         </Box>
       </Box>
-      <Box sx={{ display: 'flex', gap: 2, px: 4, mb: 2, flexDirection: { xs: 'column', md: 'row' }, alignItems: { md: 'flex-start' } }}>
+      <Box sx={{ display: 'flex', gap: 2, px: { xs: 2, sm: 4 }, mb: { xs: 1.5, sm: 2 }, flexDirection: { xs: 'column', md: 'row' }, alignItems: { md: 'flex-start' } }}>
         
         {/* Left Section: Admin Controls */}
         <Paper
           sx={{
-            p: 3,
+            p: { xs: 2, sm: 3 },
             flex: 2,
             backgroundColor: "rgba(252, 166, 30, 0.10)",
             borderRadius: "24px",
@@ -311,7 +313,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {/* Right Section: Compact Session Branding Card (matching mockup) */}
         <Paper
           sx={{
-            p: 3,
+            p: { xs: 2, sm: 3 },
             flex: 1.2,
             backgroundColor: "#ffffff",
             borderRadius: "24px",

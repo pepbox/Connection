@@ -49,15 +49,15 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
       {/* Header */}
       <Paper
         sx={{
-          p: 3,
-          mb: 3,
+          p: { xs: 2, sm: 3 },
+          mb: { xs: 2, sm: 3 },
           backgroundColor: "rgba(252, 166, 30, 0.10)",
           borderRadius: 0,
         }}
       >
         <Box
           display="flex"
-          justifyContent="space-between"
+          justifyContent={{ xs: "center", sm: "space-between" }}
           alignItems="center"
           mb={2}
         >
@@ -77,7 +77,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
           
         </Box>
         
-        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2}>
+        <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems="center" justifyContent="center" gap={{ xs: 1.5, sm: 2 }}>
           <Box
             sx={{
               width: 64,
@@ -123,15 +123,17 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
               // boxShadow: "0px 4px 10px rgba(252, 166, 30, 0.3)",
               fontFamily: '"Josefin Sans", sans-serif',
               whiteSpace: "nowrap",
-              ml: "auto",
+              ml: { xs: "auto", sm: "auto" },
+              mr: { xs: "auto", sm: "unset" },
               width: "fit-content",
+              mt: { xs: 2, sm: 0 },
             }}
           >
             Konnects: {data.selfies.length}
           </Box>
       </Paper>
 
-      <Box sx={{ px: 4, pb: 4 }}>
+      <Box sx={{ px: { xs: 2, sm: 4 }, pb: 4 }}>
         <SelfiesGallery selfies={data.selfies} />
       </Box>
     </Box>

@@ -225,17 +225,25 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
       {/* Search Filter & Status Summary */}
       <Box
         mb={2}
-        sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap", justifyContent: "space-between" }}
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: 2,
+          flexWrap: "wrap",
+          justifyContent: "space-between"
+        }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, gap: 1.5, flexWrap: "wrap", width: { xs: "100%", sm: "auto" } }}>
           <TextField
             size="small"
             placeholder="Search players by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{
-              minWidth: 200,
-              maxWidth: 300,
+              width: { xs: "100%", sm: "auto" },
+              minWidth: { xs: "100%", sm: 200 },
+              maxWidth: { xs: "100%", sm: 300 },
               "& .MuiOutlinedInput-root": {
                 height: "40px",
                 borderRadius: "8px",
@@ -249,7 +257,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
             }}
           />
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, justifyContent: { xs: "center", sm: "flex-start" } }}>
             <Chip
               label={`Joined: ${totalJoined}`}
               sx={{
@@ -263,82 +271,71 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                 px: 1,
               }}
             />
-            {/* <Chip
-              label={`Pending: ${pendingCount}`}
-              sx={{
-                fontFamily: '"Josefin Sans", sans-serif',
-                fontWeight: 700,
-                backgroundColor: pendingCount > 0 ? "rgba(252, 166, 30, 0.15)" : "rgba(72, 187, 120, 0.15)",
-                color: pendingCount > 0 ? "#d69e2e" : "#38a169",
-                borderRadius: "8px",
-                height: "40px",
-                fontSize: "0.875rem",
-                px: 1,
-              }}
-            /> */}
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: { xs: "stretch", sm: "center" }, gap: 1.5, flexWrap: "wrap", width: { xs: "100%", sm: "auto" } }}>
           {/* Configure Required Questions Count Button */}
           <Button
-          variant="contained"
-          startIcon={<QuizIcon />}
-          onClick={() => {
-            setQuestionCountInput(customQuestionsCount || 2);
-            setIsQuestionModalOpen(true);
-          }}
-          sx={{
-            height: "40px",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-            backgroundColor: "secondary.main",
-            color: "secondary.contrastText",
-            px: 2,
-            borderRadius: "8px",
-            textTransform: "none",
-            fontWeight: 700,
-            fontSize: "0.875rem",
-            fontFamily: '"Josefin Sans", sans-serif',
-            boxShadow: "0 2px 6px rgba(255, 207, 37, 0.3)",
-            "&:hover": {
-              backgroundColor: "secondary.dark",
-              boxShadow: "0 4px 12px rgba(255, 207, 37, 0.4)",
-            },
-          }}
-        >
-          Set Questions ({customQuestionsCount || 2})
-        </Button>
-        {searchQuery && (
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<ClearIcon />}
+            variant="contained"
+            startIcon={<QuizIcon />}
             onClick={() => {
-              setSearchQuery("");
+              setQuestionCountInput(customQuestionsCount || 2);
+              setIsQuestionModalOpen(true);
             }}
             sx={{
-              color: "text.secondary",
-              borderColor: "text.secondary",
-              padding: "6px 8px",
+              height: "40px",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              width: { xs: "100%", sm: "auto" },
+              backgroundColor: "secondary.main",
+              color: "secondary.contrastText",
+              px: 2,
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              fontFamily: '"Josefin Sans", sans-serif',
+              boxShadow: "0 2px 6px rgba(255, 207, 37, 0.3)",
               "&:hover": {
-                backgroundColor: "action.hover",
-                borderColor: "text.primary",
-                color: "text.primary",
+                backgroundColor: "secondary.dark",
+                boxShadow: "0 4px 12px rgba(255, 207, 37, 0.4)",
               },
             }}
           >
-            Clear Search
+            Set Questions ({customQuestionsCount || 2})
           </Button>
-        )}
-        {/* Filter Status Info */}
-        {searchQuery && (
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              Showing {filteredPlayers?.length || 0} players matching "{searchQuery}"
-            </Typography>
-          </Box>
-        )}
+          {searchQuery && (
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ClearIcon />}
+              onClick={() => {
+                setSearchQuery("");
+              }}
+              sx={{
+                color: "text.secondary",
+                borderColor: "text.secondary",
+                padding: "6px 8px",
+                width: { xs: "100%", sm: "auto" },
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                  borderColor: "text.primary",
+                  color: "text.primary",
+                },
+              }}
+            >
+              Clear Search
+            </Button>
+          )}
+          {/* Filter Status Info */}
+          {searchQuery && (
+            <Box sx={{ textAlign: { xs: "center", sm: "left" } }}>
+              <Typography variant="body2" color="text.secondary">
+                Showing {filteredPlayers?.length || 0} players matching "{searchQuery}"
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -379,9 +376,9 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
                   mb={colIdx < v2Columns.length - 1 ? 1.5 : 0}
                 >
                   <Typography
-                    variant="caption"
+                    variant="body2"
                     color="text.secondary"
-                    sx={{ fontWeight: 500 }}
+                    sx={{ fontWeight: 600, fontSize: "0.75rem", fontFamily: "Lato, sans-serif" }}
                   >
                     {col.label}
                   </Typography>
@@ -400,7 +397,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
         <TableContainer
           component={Paper}
           elevation={0}
-          sx={{ borderRadius: 2, overflow: "hidden" }}
+          sx={{ borderRadius: 2, overflow: "hidden", overflowX: "auto" }}
         >
           <Table>
             <TableHead>

@@ -126,7 +126,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         onResumeGame={() => setConfirmResumeDialogOpen(true)}
         isCheckingReadiness={isCheckingReadiness}
       />
-      <Box sx={{ px: 4 }}>
+      <Box sx={{ px: { xs: 2, sm: 4 } }}>
         <PlayerTable
           players={players}
           customQuestionsCount={headerData?.customQuestionsCount}
