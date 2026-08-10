@@ -83,6 +83,15 @@ export const gameApi = api.injectEndpoints({
       invalidatesTags: ['Connection'],
     }),
 
+    withdrawConnectionRequest: builder.mutation<any, { connectionId: string }>({
+      query: (body) => ({
+        url: '/v2/player/withdrawConnectionRequest',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Connection'],
+    }),
+
     getConnectionStatus: builder.query<any, void>({
       query: () => ({
         url: '/v2/player/getConnectionStatus',
@@ -161,4 +170,5 @@ export const {
   useSubmitConnectionSelfieMutation,
   useSubmitCustomAnswersMutation,
   useGetConnectionHistoryQuery,
+  useWithdrawConnectionRequestMutation,
 } = gameApi;

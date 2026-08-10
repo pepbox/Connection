@@ -28,7 +28,7 @@ export const addCustomQuestions = async (
     }
 
     const sessionDoc = await Session.findById(sessionId);
-    const requiredCount = sessionDoc?.customQuestionsCount || 2;
+    const requiredCount = sessionDoc?.customQuestionsCount || 1;
 
     if (!Array.isArray(questions) || questions.length !== requiredCount) {
       return next(new AppError(`You must provide exactly ${requiredCount} question(s)`, 400));
@@ -685,6 +685,68 @@ export const getConnectionHistory = async (
     });
   } catch (error) {
     console.error("Error getting connection history:", error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+export const withdrawConnectionRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const requesterId = req.user?.id;
+    const { connectionId } = req.body;
+
+    if (!requesterId || !connectionId) {
+      return next(new AppError("Connection ID is required", 400));
+    }
+
+    const connection = await Connection.findById(connectionId);
+    if (!connection) {
+      return next(new AppError("Connection request not found", 404));
+    }
+
+    if (connection.playerA.toString() !== requesterId.toString()) {
+      return next(
+        new AppError("You are not authorized to withdraw this request", 403)
+      );
+    }
+
+    if (connection.status !== "pending") {
+      return next(
+        new AppError(
+          "You cannot withdraw an accepted or completed connection",
+          400
+        )
+      );
+    }
+
+    const recipientId = connection.playerB.toString();
+    const sessionId = connection.session.toString();
+
+    await Connection.findByIdAndDelete(connectionId);
+
+    // Notify recipient B that the request was withdrawn
+    SessionEmitters.toUser(recipientId, "CONNECT_WITHDRAWN", {
+      connectionId: connection._id,
+    });
+
+    // Broadcast update to all players in the session
+    SessionEmitters.toSessionPlayers(
+      sessionId,
+      "CONNECTION_UPDATE",
+      {}
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Connection request withdrawn successfully",
+    });
+  } catch (error) {
+    console.error("Error withdrawing connection request:", error);
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "Internal Server Error",
     });

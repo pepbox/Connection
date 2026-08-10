@@ -38,7 +38,7 @@ type Column = {
 
 const PlayerTable: React.FC<PlayerTableProps> = ({
   players,
-  customQuestionsCount = 2,
+  customQuestionsCount = 1,
 }) => {
   const totalJoined = players?.length || 0;
   // const pendingCount = players?.filter(
@@ -52,11 +52,11 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
   const { sessionId } = useAppSelector((state: RootState) => state.game);
   const [updateSession] = useUpdateSessionMutation();
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
-  const [questionCountInput, setQuestionCountInput] = useState<number>(customQuestionsCount || 2);
+  const [questionCountInput, setQuestionCountInput] = useState<number>(customQuestionsCount || 1);
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    setQuestionCountInput(customQuestionsCount || 2);
+    setQuestionCountInput(customQuestionsCount || 1);
   }, [customQuestionsCount]);
 
   const handleSaveQuestionCount = async () => {
@@ -280,7 +280,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
             variant="contained"
             startIcon={<QuizIcon />}
             onClick={() => {
-              setQuestionCountInput(customQuestionsCount || 2);
+              setQuestionCountInput(customQuestionsCount || 1);
               setIsQuestionModalOpen(true);
             }}
             sx={{
@@ -303,7 +303,7 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
               },
             }}
           >
-            Set Questions ({customQuestionsCount || 2})
+            Set Questions ({customQuestionsCount || 1})
           </Button>
           {searchQuery && (
             <Button

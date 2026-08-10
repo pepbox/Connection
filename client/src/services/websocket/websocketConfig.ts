@@ -65,6 +65,15 @@ export const setupGlobalListeners = () => {
   );
 
   websocketService.addGlobalListener(
+    "CONNECT_WITHDRAWN",
+    () => {
+      console.log("Connect request withdrawn");
+      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
+    },
+    "redux"
+  );
+
+  websocketService.addGlobalListener(
     "PARTNER_SELFIE_UPLOADED",
     () => {
       console.log("Partner selfie uploaded");

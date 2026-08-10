@@ -262,7 +262,7 @@ export const fetchAdminDashboardData = async (
                 gameVersion: session.gameVersion || "v2",
                 companyName: session.companyName,
                 companyLogoUrl: session.companyLogoUrl,
-                customQuestionsCount: session.customQuestionsCount || 2,
+                customQuestionsCount: session.customQuestionsCount || 1,
             },
             players: playersData,
         };
@@ -367,7 +367,7 @@ export const checkPlayersReadiness = async (
 
         // Fetch the session to determine the game version and required question count
         const session = await sessionService.fetchSessionById(sessionId);
-        const requiredCount = session?.customQuestionsCount || 2;
+        const requiredCount = session?.customQuestionsCount || 1;
 
         // Fetch all players in the session
         const players = await playerService.getPlayersBySession(sessionId);

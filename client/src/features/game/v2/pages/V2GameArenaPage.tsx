@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Typography, Card, CardContent, CircularProgress, Alert, Avatar, Paper, BottomNavigation, BottomNavigationAction } from "@mui/material";
 import { HourglassEmpty, CameraAlt, Home, History } from "@mui/icons-material";
-import { useGetConnectionStatusQuery } from "../../services/gameArena.Api";
+import { useGetConnectionStatusQuery, useWithdrawConnectionRequestMutation } from "../../services/gameArena.Api";
 import ConnectionHub from "../components/ConnectionHub";
 import QuestionExchangeHub from "../components/QuestionExchangeHub";
 import ConnectionSelfieScreen from "../components/ConnectionSelfieScreen";
@@ -9,6 +9,7 @@ import V2CompletionPage from "../components/V2CompletionPage";
 import V2HistoryPage from "../components/V2HistoryPage";
 import Loader from "../../../../components/ui/Loader";
 import GameHeader from "../../../../components/layout/GameHeader";
+import GlobalButton from "../../../../components/ui/button";
 
 const V2GameArenaPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -21,6 +22,17 @@ const V2GameArenaPage: React.FC = () => {
     }
   });
   const { data, isLoading, error } = useGetConnectionStatusQuery();
+  const [withdrawRequest, { isLoading: isWithdrawing }] = useWithdrawConnectionRequestMutation();
+
+  const handleWithdraw = async () => {
+    if (!data?.connectionId) return;
+    try {
+      await withdrawRequest({ connectionId: data.connectionId }).unwrap();
+      console.log("Connection request withdrawn successfully");
+    } catch (err) {
+      console.error("Failed to withdraw request:", err);
+    }
+  };
 
   if (isLoading) {
     return <Loader />;
@@ -62,7 +74,7 @@ const V2GameArenaPage: React.FC = () => {
   if (!data || (data.status === "pending" && data.role === "B") || (isConnectionCompleted && isIgnored)) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh", pb: 7 }}>
-        <GameHeader />
+        <GameHeader hideBackButton={true} />
         <ConnectionHub connectionStatus={(isConnectionCompleted && isIgnored) ? null : data} />
         
         <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000 }} elevation={3}>
@@ -83,7 +95,7 @@ const V2GameArenaPage: React.FC = () => {
   if (data.status === "pending" && data.role === "A") {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <GameHeader />
+        <GameHeader hideBackButton={true} />
         <Box
           sx={{
             flex: 1,
@@ -136,6 +148,18 @@ const V2GameArenaPage: React.FC = () => {
                     Waiting for response...
                   </Typography>
                 </Box>
+
+                <GlobalButton
+                  onClick={handleWithdraw}
+                  disabled={isWithdrawing}
+                  sx={{
+                    mt: 1,
+                    bgcolor: "error.main",
+                    "&:hover": { bgcolor: "error.dark" }
+                  }}
+                >
+                  {isWithdrawing ? "Withdrawing..." : "Withdraw Request"}
+                </GlobalButton>
               </Box>
             </CardContent>
           </Card>
@@ -153,7 +177,7 @@ const V2GameArenaPage: React.FC = () => {
     if (!hasIAnswered) {
       return (
         <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <GameHeader />
+          <GameHeader hideBackButton={true} />
           <QuestionExchangeHub
             connectionId={data.connectionId}
             partnerQuestions={data.partnerQuestions}
@@ -168,7 +192,7 @@ const V2GameArenaPage: React.FC = () => {
     if (hasIAnswered && !hasPartnerAnswered) {
       return (
         <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <GameHeader />
+          <GameHeader hideBackButton={true} />
           <Box
             sx={{
               flex: 1,
@@ -234,7 +258,7 @@ const V2GameArenaPage: React.FC = () => {
     if (!data.selfieUploaded) {
       return (
         <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <GameHeader />
+          <GameHeader hideBackButton={true} />
           <ConnectionSelfieScreen
             connectionId={data.connectionId}
             partnerName={data.partner.name}
@@ -248,7 +272,7 @@ const V2GameArenaPage: React.FC = () => {
     if (data.selfieUploaded && !data.partnerSelfieUploaded) {
       return (
         <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-          <GameHeader />
+          <GameHeader hideBackButton={true} />
           <Box
             sx={{
               flex: 1,
@@ -318,7 +342,7 @@ const V2GameArenaPage: React.FC = () => {
     // Both answered and both uploaded selfies: render final completion screen
     return (
       <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-        <GameHeader />
+        <GameHeader hideBackButton={true} />
         <V2CompletionPage 
           data={data}
           onGoHome={() => {

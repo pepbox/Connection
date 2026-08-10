@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, TextField, Paper } from "@mui/material";
+import { Box, Typography, TextField, Paper, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
 import { Save } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAddCustomQuestionsMutation, useGetSessionQuery } from "../../../game/services/gameArena.Api";
+import { useAddCustomQuestionsMutation, useGetSessionQuery, useGetCustomQuestionsQuery } from "../../../game/services/gameArena.Api";
 import GameHeader from "../../../../components/layout/GameHeader";
 import GlobalButton from "../../../../components/ui/button";
+import Loader from "../../../../components/ui/Loader";
+import { useAppSelector } from "../../../../app/hooks";
+import { RootState } from "../../../../app/store";
 
 interface QuestionInput {
   questionText: string;
@@ -15,14 +18,32 @@ const CustomQuestionsBuilder: React.FC = () => {
   const navigate = useNavigate();
   const { sessionId } = useParams<{ sessionId: string }>();
   const { data: sessionData } = useGetSessionQuery(sessionId, { skip: !sessionId });
-  const requiredCount = sessionData?.customQuestionsCount || 2;
+  const requiredCount = sessionData?.customQuestionsCount || 1;
 
   const [addCustomQuestions, { isLoading }] = useAddCustomQuestionsMutation();
   
+  // Fetch existing custom questions for route guarding
+  const { data: existingQuestionsData, isLoading: isFetchingQuestions } = useGetCustomQuestionsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  const isGameStarted = useAppSelector((state: RootState) => state.game.isGameStarted);
+
   const [questions, setQuestions] = useState<QuestionInput[]>(() =>
     Array.from({ length: requiredCount }, () => ({ questionText: "", correctAnswer: "" }))
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  // Guard redirect: once questions are written, block user from accessing this page
+  useEffect(() => {
+    if (!isFetchingQuestions && existingQuestionsData?.data && existingQuestionsData.data.length >= requiredCount) {
+      if (isGameStarted) {
+        navigate(`/game/${sessionId}/arena`, { replace: true });
+      } else {
+        navigate(`/game/${sessionId}/waiting`, { replace: true });
+      }
+    }
+  }, [existingQuestionsData, isFetchingQuestions, requiredCount, isGameStarted, navigate, sessionId]);
 
   useEffect(() => {
     if (requiredCount && questions.length !== requiredCount) {
@@ -48,7 +69,7 @@ const CustomQuestionsBuilder: React.FC = () => {
     if (errorMsg) setErrorMsg(null);
   };
 
-  const handleSubmit = async () => {
+  const handlePreSubmit = () => {
     // Validate: All required questions must have questionText filled
     const invalidQuestion = questions.find((q) => q.questionText.trim().length === 0);
     
@@ -57,6 +78,12 @@ const CustomQuestionsBuilder: React.FC = () => {
       return;
     }
 
+    setErrorMsg(null);
+    setIsConfirmOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    setIsConfirmOpen(false);
     try {
       await addCustomQuestions({
         questions: questions.map((q) => ({
@@ -76,6 +103,10 @@ const CustomQuestionsBuilder: React.FC = () => {
     }
   };
 
+  if (isFetchingQuestions) {
+    return <Loader />;
+  }
+
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", bgcolor: "#fffdf0" }}>
       <GameHeader />
@@ -94,7 +125,7 @@ const CustomQuestionsBuilder: React.FC = () => {
           Create Your Questions!
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.9, color: "white", fontFamily: '"Josefin Sans", sans-serif' }}>
-          Write {requiredCount} fun facts or trivia questions about yourself for another player to answer.
+          Write {requiredCount} fun fact{requiredCount > 1 ? "s" : ""} or trivia question{requiredCount > 1 ? "s" : ""} about yourself for another player to answer.
         </Typography>
       </Box>
 
@@ -179,13 +210,64 @@ const CustomQuestionsBuilder: React.FC = () => {
         <GlobalButton
           fullWidth
           disabled={isLoading}
-          onClick={handleSubmit}
+          onClick={handlePreSubmit}
           sx={{ maxWidth: "400px" }}
           startIcon={<Save />}
         >
           {isLoading ? "Saving..." : "Submit Questions"}
         </GlobalButton>
       </Box>
+
+      {/* Double verification dialog */}
+      <Dialog
+        open={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        aria-labelledby="confirm-submit-dialog-title"
+        aria-describedby="confirm-submit-dialog-description"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "16px",
+            p: 1.5,
+          }
+        }}
+      >
+        <DialogTitle id="confirm-submit-dialog-title" sx={{ fontFamily: '"Josefin Sans", sans-serif', fontWeight: 800 }}>
+          Confirm Submission
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="confirm-submit-dialog-description" sx={{ fontFamily: '"Josefin Sans", sans-serif', color: "text.secondary" }}>
+            Are you sure you want to submit your custom questions? You won't be able to edit them after submitting.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+          <Button
+            onClick={() => setIsConfirmOpen(false)}
+            variant="outlined"
+            sx={{
+              borderColor: "text.primary",
+              color: "text.primary",
+              borderRadius: "12px",
+              fontFamily: '"Josefin Sans", sans-serif',
+              fontWeight: 600,
+              px: 3,
+              "&:hover": { borderColor: "text.primary", bgcolor: "rgba(0,0,0,0.04)" }
+            }}
+          >
+            Cancel
+          </Button>
+          <GlobalButton
+            onClick={handleSubmit}
+            disabled={isLoading}
+            fullWidth={false}
+            sx={{
+              borderRadius: "12px",
+              px: 3,
+            }}
+          >
+            Yes, Submit
+          </GlobalButton>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

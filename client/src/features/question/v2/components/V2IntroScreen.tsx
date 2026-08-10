@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Box, Typography, Paper } from "@mui/material";
 import GlobalButton from "../../../../components/ui/button";
 import GameHeader from "../../../../components/layout/GameHeader";
-import { useAppDispatch } from "../../../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../../../app/hooks";
+import { RootState } from "../../../../app/store";
 import { setCurrentStep } from "../../../game/services/gameSlice";
+import { useGetCustomQuestionsQuery, useGetSessionQuery } from "../../../game/services/gameArena.Api";
+import Loader from "../../../../components/ui/Loader";
 
 const V2IntroScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +15,26 @@ const V2IntroScreen: React.FC = () => {
   const sessionId = useParams<{ sessionId: string }>().sessionId;
   const [currentStep, setCurrentStepLocal] = useState(0);
   const [viewedSteps, setViewedSteps] = useState<Set<number>>(new Set([0])); // Track viewed steps, start with step 0
+
+  const { data: sessionData } = useGetSessionQuery(sessionId as string, { skip: !sessionId });
+  const requiredCount = sessionData?.customQuestionsCount || 1;
+
+  // Fetch existing custom questions for route guarding
+  const { data: existingQuestionsData, isLoading: isFetchingQuestions } = useGetCustomQuestionsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
+  const isGameStarted = useAppSelector((state: RootState) => state.game.isGameStarted);
+
+  // Guard redirect: once questions are written, block user from accessing this intro page
+  useEffect(() => {
+    if (!isFetchingQuestions && existingQuestionsData?.data && existingQuestionsData.data.length >= requiredCount) {
+      if (isGameStarted) {
+        navigate(`/game/${sessionId}/arena`, { replace: true });
+      } else {
+        navigate(`/game/${sessionId}/waiting`, { replace: true });
+      }
+    }
+  }, [existingQuestionsData, isFetchingQuestions, requiredCount, isGameStarted, navigate, sessionId]);
 
   const handleJumpIn = () => {
     dispatch(setCurrentStep(4));
@@ -69,6 +92,10 @@ const V2IntroScreen: React.FC = () => {
     },
   ];
 
+  if (isFetchingQuestions) {
+    return <Loader />;
+  }
+
   return (
     <Box
       sx={{
@@ -78,7 +105,7 @@ const V2IntroScreen: React.FC = () => {
         justifyContent: "space-between",
       }}
     >
-      <GameHeader />
+      <GameHeader hideBackButton={true} />
 
       {/* Game Board Section */}
       <Box

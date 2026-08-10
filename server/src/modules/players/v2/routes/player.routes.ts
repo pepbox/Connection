@@ -17,6 +17,7 @@ router.post('/submitConnectionSelfie', authenticateUser, uploadMiddleware.single
   folder: "selfies",
 }), asyncHandeler(playerControllers.submitConnectionSelfie));
 router.post('/submitCustomAnswers', authenticateUser, asyncHandeler(playerControllers.submitCustomAnswers));
+router.post('/withdrawConnectionRequest', authenticateUser, asyncHandeler(playerControllers.withdrawConnectionRequest));
 router.get('/getConnectionHistory', authenticateUser, asyncHandeler(playerControllers.getConnectionHistory));
 
 export default router;

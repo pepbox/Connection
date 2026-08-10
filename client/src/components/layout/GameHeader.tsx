@@ -8,9 +8,10 @@ import konnectLogo from "../../assets/Konnect-Logo.webp";
 
 interface GameHeaderProps {
   title?: string;
+  hideBackButton?: boolean;
 }
 
-const GameHeader: React.FC<GameHeaderProps> = ({ title }) => {
+const GameHeader: React.FC<GameHeaderProps> = ({ title, hideBackButton }) => {
   const navigate = useNavigate();
   const { sessionId } = useAppSelector((state: RootState) => state.game);
   
@@ -31,13 +32,15 @@ const GameHeader: React.FC<GameHeaderProps> = ({ title }) => {
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <IconButton onClick={() => navigate(-1)} sx={{ p: 0.5 }}>
-          <ArrowBack />
-        </IconButton>
+        {!hideBackButton && (
+          <IconButton onClick={() => navigate(-1)} sx={{ p: 0.5 }}>
+            <ArrowBack />
+          </IconButton>
+        )}
         <img 
           src={sessionData?.companyLogoUrl || konnectLogo} 
           alt="Logo" 
-          style={{ height: '30px', marginLeft: '8px', objectFit: 'contain' }} 
+          style={{ height: '30px', marginLeft: !hideBackButton ? '8px' : '0px', objectFit: 'contain' }} 
         />
       </Box>
       <Typography

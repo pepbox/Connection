@@ -28,7 +28,7 @@ const sessionSchema = new Schema<ISession>({
     },
     customQuestionsCount: {
         type: Number,
-        default: 2,
+        default: 1,
         min: 1
     }
 }, {
