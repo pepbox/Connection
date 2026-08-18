@@ -30,7 +30,7 @@ export const gameApi = api.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (response: { data: Player[] }) => response.data,
-      providesTags: ['Connection'],
+      providesTags: ['Teammates'],
     }),
 
     getSession: builder.query<Session, string | void>({
@@ -71,7 +71,7 @@ export const gameApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Connection'],
+      invalidatesTags: ['Teammates', 'ConnectionStatus'],
     }),
 
     respondToConnectionRequest: builder.mutation<any, { connectionId: string, action: 'accept' | 'reject' }>({
@@ -80,7 +80,7 @@ export const gameApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Connection'],
+      invalidatesTags: ['Teammates', 'ConnectionStatus'],
     }),
 
     withdrawConnectionRequest: builder.mutation<any, { connectionId: string }>({
@@ -89,7 +89,7 @@ export const gameApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Connection'],
+      invalidatesTags: ['Teammates', 'ConnectionStatus'],
     }),
 
     getConnectionStatus: builder.query<any, void>({
@@ -98,21 +98,25 @@ export const gameApi = api.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (response: { data: any }) => response.data,
-      providesTags: ['Connection'],
+      providesTags: ['ConnectionStatus'],
       async onCacheEntryAdded(_arg, { cacheDataLoaded, cacheEntryRemoved, dispatch }) {
         try {
           await cacheDataLoaded;
 
-          const handleUpdate = () => {
-            dispatch(gameApi.util.invalidateTags(['Connection']));
+          const handleStatusUpdate = () => {
+            dispatch(gameApi.util.invalidateTags(['ConnectionStatus']));
           };
 
-          const cleanup1 = websocketService.addGlobalListener('CONNECT_REQUEST', handleUpdate, 'api');
-          const cleanup2 = websocketService.addGlobalListener('CONNECTION_REQUEST_ACCEPTED', handleUpdate, 'api');
-          const cleanup3 = websocketService.addGlobalListener('CONNECTION_REQUEST_REJECTED', handleUpdate, 'api');
-          const cleanup4 = websocketService.addGlobalListener('PARTNER_SELFIE_UPLOADED', handleUpdate, 'api');
-          const cleanup5 = websocketService.addGlobalListener('PARTNER_ANSWERS_SUBMITTED', handleUpdate, 'api');
-          const cleanup6 = websocketService.addGlobalListener('CONNECTION_UPDATE', handleUpdate, 'api');
+          const handleTeammatesUpdate = () => {
+            dispatch(gameApi.util.invalidateTags(['Teammates']));
+          };
+
+          const cleanup1 = websocketService.addGlobalListener('CONNECT_REQUEST', handleStatusUpdate, 'api');
+          const cleanup2 = websocketService.addGlobalListener('CONNECT_RESPONSE', handleStatusUpdate, 'api');
+          const cleanup3 = websocketService.addGlobalListener('CONNECT_WITHDRAWN', handleStatusUpdate, 'api');
+          const cleanup4 = websocketService.addGlobalListener('PARTNER_SELFIE_UPLOADED', handleStatusUpdate, 'api');
+          const cleanup5 = websocketService.addGlobalListener('PARTNER_ANSWERS_SUBMITTED', handleStatusUpdate, 'api');
+          const cleanup6 = websocketService.addGlobalListener('CONNECTION_UPDATE', handleTeammatesUpdate, 'api');
 
           await cacheEntryRemoved;
 
@@ -134,7 +138,7 @@ export const gameApi = api.injectEndpoints({
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: ['Connection'],
+      invalidatesTags: ['ConnectionStatus', 'ConnectionHistory'],
     }),
 
     submitCustomAnswers: builder.mutation<any, { connectionId: string, answers: Array<{ questionId: string, answer: string }> }>({
@@ -143,7 +147,7 @@ export const gameApi = api.injectEndpoints({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Connection'],
+      invalidatesTags: ['ConnectionStatus'],
     }),
 
     getConnectionHistory: builder.query<any[], void>({
@@ -152,7 +156,7 @@ export const gameApi = api.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (response: { data: any[] }) => response.data,
-      providesTags: ['Connection'],
+      providesTags: ['ConnectionHistory'],
     }),
   }),
 });

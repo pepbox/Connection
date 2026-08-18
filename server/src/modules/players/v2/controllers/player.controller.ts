@@ -7,6 +7,7 @@ import { CustomQuestion } from "../../../questions/models/customQuestion.model";
 import { Connection } from "../../models/connection.model";
 import { Session } from "../../../session/models/session.model";
 import FileService from "../../../files/services/fileService";
+import { FileModel } from "../../../files/models/File";
 import { SessionEmitters } from "../../../../services/socket/sessionEmitters";
 import { Events } from "../../../../services/socket/enums/Events";
 import { deleteFromS3 } from "../../../../services/fileUpload";
@@ -340,7 +341,7 @@ export const getConnectionStatus = async (
         { playerA: new Types.ObjectId(playerId.toString()) },
         { playerB: new Types.ObjectId(playerId.toString()) },
       ],
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 }).lean();
 
     if (!connection) {
       res.status(StatusCodes.OK).json({
@@ -354,7 +355,13 @@ export const getConnectionStatus = async (
     const isPlayerA = connection.playerA.toString() === playerId.toString();
     const partnerId = isPlayerA ? connection.playerB : connection.playerA;
 
-    const partner = await Player.findById(partnerId);
+    // Fetch partner info, my questions, and partner questions in parallel
+    const [partner, myQuestions, partnerQuestions] = await Promise.all([
+      Player.findById(partnerId).lean(),
+      CustomQuestion.find({ player: playerId, session: sessionId }).select("-correctAnswer").lean(),
+      CustomQuestion.find({ player: partnerId, session: sessionId }).select("-correctAnswer").lean(),
+    ]);
+
     let partnerProfilePhoto = "";
     if (partner?.profilePhoto) {
       const file = await fileService.getFileById(
@@ -373,18 +380,18 @@ export const getConnectionStatus = async (
     let selfieUrl = "";
     let partnerSelfieUrl = "";
 
-    if (mySelfieId) {
-      const file = await fileService.getFileById(mySelfieId.toString());
-      selfieUrl = file?.location || "";
-    }
-    if (partnerSelfieId) {
-      const file = await fileService.getFileById(partnerSelfieId.toString());
-      partnerSelfieUrl = file?.location || "";
-    }
+    // Fetch selfies in parallel
+    const [selfieFile, partnerSelfieFile] = await Promise.all([
+      mySelfieId ? fileService.getFileById(mySelfieId.toString()) : Promise.resolve(null),
+      partnerSelfieId ? fileService.getFileById(partnerSelfieId.toString()) : Promise.resolve(null),
+    ]);
 
-    // Get custom questions — strip correctAnswer from both to avoid leaking answers
-    const myQuestions = await CustomQuestion.find({ player: playerId, session: sessionId }).select("-correctAnswer");
-    const partnerQuestions = await CustomQuestion.find({ player: partnerId, session: sessionId }).select("-correctAnswer");
+    if (selfieFile) {
+      selfieUrl = selfieFile.location || "";
+    }
+    if (partnerSelfieFile) {
+      partnerSelfieUrl = partnerSelfieFile.location || "";
+    }
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -623,61 +630,98 @@ export const getConnectionHistory = async (
         { playerA: new Types.ObjectId(playerId.toString()) },
         { playerB: new Types.ObjectId(playerId.toString()) },
       ],
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 }).lean();
 
-    const historyData = await Promise.all(
-      connections.map(async (connection) => {
-        const isPlayerA = connection.playerA.toString() === playerId.toString();
-        const partnerId = isPlayerA ? connection.playerB : connection.playerA;
+    if (connections.length === 0) {
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: [],
+      });
+      return;
+    }
 
-        const partner = await Player.findById(partnerId);
-        let partnerProfilePhoto = "";
-        if (partner?.profilePhoto) {
-          const file = await fileService.getFileById(partner.profilePhoto.toString());
-          partnerProfilePhoto = file?.location || "";
-        }
+    // 1. Hoist myQuestions fetch outside of the mapping loop
+    const myQuestions = await CustomQuestion.find({
+      player: playerId,
+      session: sessionId,
+    }).select("-correctAnswer").lean();
 
-        const mySelfieId = isPlayerA ? connection.selfieA : connection.selfieB;
-        const partnerSelfieId = isPlayerA ? connection.selfieB : connection.selfieA;
+    // 2. Batch fetch partner IDs and their details
+    const partnerIds = connections.map((connection) => {
+      const isPlayerA = connection.playerA.toString() === playerId.toString();
+      return isPlayerA ? connection.playerB : connection.playerA;
+    });
 
-        let selfieUrl = "";
-        let partnerSelfieUrl = "";
+    const partners = await Player.find({ _id: { $in: partnerIds } }).lean();
+    const partnerMap = new Map(partners.map((p) => [p._id.toString(), p]));
 
-        if (mySelfieId) {
-          const file = await fileService.getFileById(mySelfieId.toString());
-          selfieUrl = file?.location || "";
-        }
-        if (partnerSelfieId) {
-          const file = await fileService.getFileById(partnerSelfieId.toString());
-          partnerSelfieUrl = file?.location || "";
-        }
+    // 3. Batch fetch partner questions
+    const allPartnerQuestions = await CustomQuestion.find({
+      player: { $in: partnerIds },
+      session: sessionId,
+    }).select("-correctAnswer").lean();
 
-        const myQuestions = await CustomQuestion.find({ player: playerId, session: sessionId }).select("-correctAnswer");
-        const partnerQuestions = await CustomQuestion.find({ player: partnerId, session: sessionId }).select("-correctAnswer");
+    const partnerQuestionsMap = new Map<string, any[]>();
+    allPartnerQuestions.forEach((q) => {
+      const pId = q.player.toString();
+      if (!partnerQuestionsMap.has(pId)) {
+        partnerQuestionsMap.set(pId, []);
+      }
+      partnerQuestionsMap.get(pId)!.push(q);
+    });
 
-        return {
-          connectionId: connection._id,
-          status: connection.status,
-          role: isPlayerA ? "A" : "B",
-          selfieUploaded: true,
-          partnerSelfieUploaded: true,
-          selfieUrl,
-          partnerSelfieUrl,
-          partner: partner
-            ? {
-                id: partner._id,
-                name: partner.name,
-                profilePhoto: partnerProfilePhoto,
-              }
-            : null,
-          myQuestions,
-          partnerQuestions,
-          myAnswers: isPlayerA ? (connection.answersA || []) : (connection.answersB || []),
-          partnerAnswers: isPlayerA ? (connection.answersB || []) : (connection.answersA || []),
-          createdAt: connection.createdAt,
-        };
-      })
-    );
+    // 4. Batch fetch files (partner photos & selfies)
+    const fileIds = new Set<string>();
+    partners.forEach((p) => {
+      if (p.profilePhoto) fileIds.add(p.profilePhoto.toString());
+    });
+    connections.forEach((conn) => {
+      if (conn.selfieA) fileIds.add(conn.selfieA.toString());
+      if (conn.selfieB) fileIds.add(conn.selfieB.toString());
+    });
+
+    const files = await FileModel.find({ _id: { $in: Array.from(fileIds) } }).lean();
+    const fileLocationMap = new Map(files.map((f) => [f._id.toString(), f.location]));
+
+    const historyData = connections.map((connection) => {
+      const isPlayerA = connection.playerA.toString() === playerId.toString();
+      const partnerId = isPlayerA ? connection.playerB.toString() : connection.playerA.toString();
+      const partner = partnerMap.get(partnerId);
+
+      const partnerProfilePhoto = partner?.profilePhoto
+        ? fileLocationMap.get(partner.profilePhoto.toString()) || ""
+        : "";
+
+      const mySelfieId = isPlayerA ? connection.selfieA : connection.selfieB;
+      const partnerSelfieId = isPlayerA ? connection.selfieB : connection.selfieA;
+
+      const selfieUrl = mySelfieId ? fileLocationMap.get(mySelfieId.toString()) || "" : "";
+      const partnerSelfieUrl = partnerSelfieId ? fileLocationMap.get(partnerSelfieId.toString()) || "" : "";
+
+      const partnerQuestions = partnerQuestionsMap.get(partnerId) || [];
+
+      return {
+        connectionId: connection._id,
+        status: connection.status,
+        role: isPlayerA ? "A" : "B",
+        selfieUploaded: true,
+        partnerSelfieUploaded: true,
+        selfieUrl,
+        partnerSelfieUrl,
+        partner: partner
+          ? {
+              id: partner._id,
+              name: partner.name,
+              profilePhoto: partnerProfilePhoto,
+            }
+          : null,
+        myQuestions,
+        partnerQuestions,
+        myAnswers: isPlayerA ? (connection.answersA || []) : (connection.answersB || []),
+        partnerAnswers: isPlayerA ? (connection.answersB || []) : (connection.answersA || []),
+        createdAt: connection.createdAt,
+      };
+    });
 
     res.status(StatusCodes.OK).json({
       success: true,

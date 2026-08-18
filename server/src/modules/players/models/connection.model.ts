@@ -40,4 +40,10 @@ connectionSchema.index(
   { unique: true }
 );
 
+// Optimize status updates and queries referencing playerB in the session
+connectionSchema.index({ session: 1, playerB: 1 });
+
+// Optimize retrieval of completed vs active connections
+connectionSchema.index({ session: 1, isCompleted: 1 });
+
 export const Connection = model<IConnection>('Connection', connectionSchema);

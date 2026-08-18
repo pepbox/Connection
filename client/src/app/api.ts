@@ -134,7 +134,9 @@ export const api = createApi({
         "GameSession",
         "Selfie",
         "GameCompletion",
-        "Connection",
+        "ConnectionStatus",
+        "Teammates",
+        "ConnectionHistory",
     ],
     endpoints: () => ({}),
 });

@@ -11,6 +11,10 @@ import { Connection } from '../../players/models/connection.model';
 import TeamService from '../../teams/services/team.service';
 import { SessionStatus } from '../../session/types/enums';
 import FileService from '../../files/services/fileService';
+import { FileModel } from '../../files/models/File';
+import { deleteFromS3 } from '../../../services/fileUpload';
+import { SessionEmitters } from '../../../services/socket/sessionEmitters';
+import { Events } from '../../../services/socket/enums/Events';
 
 const adminService = new AdminServices();
 const sessionService = new SessionService();
@@ -322,7 +326,7 @@ export const fetchLeaderboardData = async (
         );
         selfies = [...selfies, ...connectionSelfies];
 
-        // Filter out selfies without images, sort by latest first, and get top 12
+        // Filter out selfies without images, sort by latest first, and get all selfies
         const filteredAndSortedSelfies = selfies
             .filter((selfie: any) => selfie.selfieId) // Only include selfies that exist
             .sort((a: any, b: any) => {
@@ -330,8 +334,7 @@ export const fetchLeaderboardData = async (
                 const dateA = new Date(a.updatedAt || a.createdAt);
                 const dateB = new Date(b.updatedAt || b.createdAt);
                 return dateB.getTime() - dateA.getTime(); // Sort by latest first
-            })
-            .slice(0, 12); // Get only top 12 latest selfies
+            });
 
         const session = await sessionService.fetchSessionById(sessionId);
 
@@ -517,5 +520,83 @@ export const getPlayerWithResponses = async (
     } catch (error) {
         console.error("Error fetching player with responses:", error);
         next(new AppError("Failed to fetch player responses.", 500));
+    }
+};
+
+export const removePlayer = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { playerId } = req.params;
+        const sessionId = req.user?.sessionId;
+
+        if (!playerId || !sessionId) {
+            return next(new AppError("Player ID and Session ID are required.", 400));
+        }
+
+        const player = await Player.findOne({ _id: playerId, session: sessionId });
+        if (!player) {
+            return next(new AppError("Player not found in this session.", 404));
+        }
+
+        // 1. Delete profile photo from S3 and File collection
+        if (player.profilePhoto) {
+            const fileDoc = await FileModel.findById(player.profilePhoto);
+            if (fileDoc && fileDoc.fileName) {
+                try {
+                    await deleteFromS3(fileDoc.fileName);
+                } catch (s3Error) {
+                    console.error(`S3 deletion failed for file ${fileDoc.fileName}:`, s3Error);
+                }
+            }
+            await FileModel.findByIdAndDelete(player.profilePhoto);
+        }
+
+        // 2. Delete all CustomQuestions written by this player
+        await CustomQuestion.deleteMany({ player: playerId, session: sessionId });
+
+        // 3. Delete all Connections involving this player
+        const connections = await Connection.find({
+            session: sessionId,
+            $or: [{ playerA: playerId }, { playerB: playerId }]
+        });
+
+        const partnerIds = connections.map(conn => 
+            conn.playerA.toString() === playerId.toString() ? conn.playerB.toString() : conn.playerA.toString()
+        );
+
+        await Connection.deleteMany({
+            session: sessionId,
+            $or: [{ playerA: playerId }, { playerB: playerId }]
+        });
+
+        // 4. Delete the player record
+        await Player.findByIdAndDelete(playerId);
+
+        // 5. Emit socket events:
+        // A. Tell the removed player's client that they are removed (so they log off)
+        SessionEmitters.toUser(playerId, Events.PLAYER_REMOVED, {
+            message: "You have been removed by the admin."
+        });
+
+        // B. Notify partners of the connection update so their UI invalidates connection status/teammates
+        partnerIds.forEach(partnerId => {
+            SessionEmitters.toUser(partnerId, Events.CONNECT_WITHDRAWN, {});
+            SessionEmitters.toUser(partnerId, Events.CONNECTION_UPDATE, {});
+        });
+
+        // C. Notify all session clients that players and connections updated
+        SessionEmitters.toSession(sessionId.toString(), Events.PLAYERS_UPDATE, {});
+        SessionEmitters.toSession(sessionId.toString(), Events.CONNECTION_UPDATE, {});
+
+        res.status(200).json({
+            success: true,
+            message: "Player removed successfully."
+        });
+    } catch (error) {
+        console.error("Error removing player:", error);
+        next(new AppError("Failed to remove player.", 500));
     }
 };

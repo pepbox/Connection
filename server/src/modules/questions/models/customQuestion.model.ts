@@ -18,4 +18,7 @@ const customQuestionSchema = new Schema<ICustomQuestion>({
   timestamps: true
 });
 
+// Optimize direct question queries referencing player and session
+customQuestionSchema.index({ player: 1, session: 1 });
+
 export const CustomQuestion = model<ICustomQuestion>('CustomQuestion', customQuestionSchema);

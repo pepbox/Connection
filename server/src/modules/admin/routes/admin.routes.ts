@@ -17,5 +17,6 @@ router.get('/fetchLeaderboardData', authenticateUser, authorizeRoles("ADMIN"), a
 router.get('/checkPlayersReadiness', authenticateUser, authorizeRoles("ADMIN"), asyncHandeler(adminControllers.checkPlayersReadiness));
 router.put('/updatePlayer', authenticateUser, authorizeRoles("ADMIN"), asyncHandeler(playerControllers.updatePlayer));
 router.get('/getPlayerWithResponses/:playerId', authenticateUser, authorizeRoles("ADMIN"), asyncHandeler(adminControllers.getPlayerWithResponses));
+router.delete('/removePlayer/:playerId', authenticateUser, authorizeRoles("ADMIN"), asyncHandeler(adminControllers.removePlayer));
 
 export default router;

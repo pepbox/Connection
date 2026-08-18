@@ -1,4 +1,4 @@
-import { Clear as ClearIcon, Quiz as QuizIcon } from "@mui/icons-material";
+import { Clear as ClearIcon, Quiz as QuizIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import {
   Button,
   Chip,
@@ -22,10 +22,12 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { PlayerTableProps } from "../types/interfaces";
-import { useUpdateSessionMutation } from "../services/admin.Api";
+import { useUpdateSessionMutation, useRemovePlayerMutation } from "../services/admin.Api";
 import { useAppSelector } from "../../../app/rootReducer";
 import { RootState } from "../../../app/store";
 
@@ -51,9 +53,14 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
   
   const { sessionId } = useAppSelector((state: RootState) => state.game);
   const [updateSession] = useUpdateSessionMutation();
+  const [removePlayer, { isLoading: isRemovingPlayer }] = useRemovePlayerMutation();
+  
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [questionCountInput, setQuestionCountInput] = useState<number>(customQuestionsCount || 1);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [playerToRemove, setPlayerToRemove] = useState<any>(null);
 
   useEffect(() => {
     setQuestionCountInput(customQuestionsCount || 1);
@@ -69,6 +76,22 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
       console.error("Failed to update question count:", err);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleRemovePlayerClick = (player: any) => {
+    setPlayerToRemove(player);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmRemovePlayer = async () => {
+    if (!playerToRemove) return;
+    try {
+      await removePlayer(playerToRemove.id).unwrap();
+      setIsDeleteModalOpen(false);
+      setPlayerToRemove(null);
+    } catch (err) {
+      console.error("Failed to remove player:", err);
     }
   };
 
@@ -214,6 +237,28 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
           />
         );
       },
+    },
+    {
+      key: "actions",
+      label: "Actions",
+      sortable: false,
+      render: (player) => (
+        <Tooltip title="Remove Player" arrow>
+          <IconButton
+            color="error"
+            size="small"
+            onClick={() => handleRemovePlayerClick(player)}
+            sx={{
+              backgroundColor: "rgba(211, 47, 47, 0.04)",
+              "&:hover": {
+                backgroundColor: "rgba(211, 47, 47, 0.12)",
+              },
+            }}
+          >
+            <DeleteIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
+      ),
     },
   ];
 
@@ -515,6 +560,47 @@ const PlayerTable: React.FC<PlayerTableProps> = ({
             }}
           >
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Remove Player Confirmation Dialog */}
+      <Dialog
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        PaperProps={{
+          sx: { borderRadius: "12px", p: 1 }
+        }}
+      >
+        <DialogTitle sx={{ fontFamily: '"Josefin Sans", sans-serif', fontWeight: 700 }}>
+          Remove Player
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
+            Are you sure you want to remove <strong>{playerToRemove?.name}</strong> from the session? This will delete all of their data, questions, and active connections. They will also be immediately logged off.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setIsDeleteModalOpen(false)}
+            sx={{ fontFamily: '"Josefin Sans", sans-serif', textTransform: "none", color: "#64748b" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmRemovePlayer}
+            color="error"
+            variant="contained"
+            disabled={isRemovingPlayer}
+            startIcon={isRemovingPlayer ? <CircularProgress size={16} color="inherit" /> : null}
+            sx={{
+              fontFamily: '"Josefin Sans", sans-serif',
+              textTransform: "none",
+              borderRadius: "8px",
+              boxShadow: "none",
+            }}
+          >
+            {isRemovingPlayer ? "Removing..." : "Remove Player"}
           </Button>
         </DialogActions>
       </Dialog>

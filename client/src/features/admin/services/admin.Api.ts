@@ -114,6 +114,13 @@ export const adminApi = api.injectEndpoints({
         responseHandler: (response) => response.blob(),
       }),
     }),
+    removePlayer: builder.mutation<{ success: boolean; message: string }, string>({
+      query: (playerId) => ({
+        url: `/admin/removePlayer/${playerId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["AdminPlayer"],
+    }),
 
   }),
 
@@ -130,5 +137,6 @@ export const {
   useLazyFetchAdminQuery,
   useLazyCheckPlayersReadinessQuery,
   useDownloadSessionSelfiesMutation,
-  useUploadSessionLogoMutation
+  useUploadSessionLogoMutation,
+  useRemovePlayerMutation
 } = adminApi;

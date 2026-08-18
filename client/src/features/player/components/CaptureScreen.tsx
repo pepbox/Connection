@@ -17,7 +17,7 @@ const CaptureScreen: React.FC = () => {
   const webcamRef = useRef<Webcam>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [OnboardPlayer] = useOnboardPlayerMutation();
+  const [OnboardPlayer, { isLoading: isOnboarding }] = useOnboardPlayerMutation();
   const playerName = useAppSelector((state) => state.player.player?.name);
   const teamNumber = useAppSelector((state) => state.player.player?.teamNumber);
   const { sessionId } = useAppSelector((state: RootState) => state.game);
@@ -73,7 +73,7 @@ const CaptureScreen: React.FC = () => {
   }, [capturedImage]);
 
   const handleConfirm = async () => {
-    if (!capturedImage) return;
+    if (!capturedImage || isOnboarding) return;
 
     try {
       // Convert base64 to File object
@@ -262,8 +262,12 @@ const CaptureScreen: React.FC = () => {
 
           {capturedImage ? (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <GlobalButton onClick={handleConfirm}>Confirm</GlobalButton>
-              <GlobalButton onClick={handleRetake}>Retake</GlobalButton>
+              <GlobalButton onClick={handleConfirm} disabled={isOnboarding}>
+                {isOnboarding ? "Confirming..." : "Confirm"}
+              </GlobalButton>
+              <GlobalButton onClick={handleRetake} disabled={isOnboarding}>
+                Retake
+              </GlobalButton>
             </Box>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>

@@ -6,6 +6,7 @@ import { throttle } from "../../utils/throttle";
 import { Events } from "./enums/Events";
 import { gameApi } from "../../features/game/services/gameArena.Api";
 import { adminApi } from "../../features/admin/services/admin.Api";
+import { logoutPlayer } from "../../features/player/services/player.slice";
 
 export const setupGlobalListeners = () => {
   if ((setupGlobalListeners as any)._initialized) return;
@@ -47,55 +48,16 @@ export const setupGlobalListeners = () => {
   );
 
   websocketService.addGlobalListener(
-    "CONNECT_REQUEST",
+    Events.PLAYER_REMOVED,
     () => {
-      console.log("Connect request received");
-      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
-    },
-    "redux"
-  );
-
-  websocketService.addGlobalListener(
-    "CONNECT_RESPONSE",
-    () => {
-      console.log("Connect response received");
-      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
-    },
-    "redux"
-  );
-
-  websocketService.addGlobalListener(
-    "CONNECT_WITHDRAWN",
-    () => {
-      console.log("Connect request withdrawn");
-      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
-    },
-    "redux"
-  );
-
-  websocketService.addGlobalListener(
-    "PARTNER_SELFIE_UPLOADED",
-    () => {
-      console.log("Partner selfie uploaded");
-      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
-    },
-    "redux"
-  );
-
-  websocketService.addGlobalListener(
-    "PARTNER_ANSWERS_SUBMITTED",
-    () => {
-      console.log("Partner answers submitted");
-      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
-    },
-    "redux"
-  );
-
-  websocketService.addGlobalListener(
-    "CONNECTION_UPDATE",
-    () => {
-      console.log("Connection update received");
-      store.dispatch(gameApi.util.invalidateTags(["Connection"]));
+      console.log("Player removed by admin, logging off...");
+      const sessionId = store.getState().game.sessionId;
+      store.dispatch(logoutPlayer());
+      if (sessionId) {
+        window.location.href = `/game/${sessionId}`;
+      } else {
+        window.location.href = "/";
+      }
     },
     "redux"
   );

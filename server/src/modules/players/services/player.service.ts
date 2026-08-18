@@ -23,7 +23,7 @@ class PlayerService {
   }
 
   async getPlayersBySession(sessionId: Types.ObjectId): Promise<IPlayer[]> {
-    return await this.playerModel.find({ session: sessionId });
+    return await this.playerModel.find({ session: sessionId }).lean();
   }
 
   async updatePlayerById(
