@@ -230,7 +230,7 @@ export const getPlayersBySession = async (
         filteredPlayers[i],
       ];
     }
-    const plainPlayers = filteredPlayers.map((player: any) => player.toObject());
+    const plainPlayers: any[] = filteredPlayers;
 
     // Bug 11 fix: Batch-fetch all profile photo files in a single $in query (avoid N+1)
     const photoIds = plainPlayers
