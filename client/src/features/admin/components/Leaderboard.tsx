@@ -4,6 +4,7 @@ import {
   Typography,
   Button,
   Paper,
+  IconButton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -53,43 +54,47 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
           mb: { xs: 2, sm: 3 },
           backgroundColor: "rgba(252, 166, 30, 0.10)",
           borderRadius: 0,
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: { xs: "72px", sm: "96px" },
         }}
       >
-        <Box
-          display="flex"
-          justifyContent={{ xs: "center", sm: "space-between" }}
-          alignItems="center"
-          mb={2}
+        <IconButton
+          onClick={handleBackToDashboard}
+          sx={{
+            position: "absolute",
+            left: { xs: 16, sm: 24 },
+            color: "text.primary",
+            border: "1px solid rgba(0, 0, 0, 0.12)",
+            borderRadius: "12px",
+            p: 1.25,
+            "&:hover": {
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
+            },
+          }}
         >
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBackToDashboard}
-            sx={{
-              textTransform: "none",
-              borderRadius: "8px",
-              fontWeight: 500,
-            }}
-          >
-            Back to Dashboard
-          </Button>
-          
-          
-        </Box>
-        
-        <Box display="flex" flexDirection={{ xs: "column", sm: "row" }} alignItems="center" justifyContent="center" gap={{ xs: 1.5, sm: 2 }}>
+          <ArrowBackIcon />
+        </IconButton>
+
+        <Box 
+          display="flex" 
+          alignItems="center" 
+          justifyContent="center" 
+          gap={{ xs: 1, sm: 2 }}
+          sx={{ width: "100%", px: { xs: 8, sm: 16 } }}
+        >
           <Box
             sx={{
-              width: 64,
-              height: 64,
-              borderRadius: "16px",
-              boxShadow: "0px 6px 12px rgba(30, 58, 138, 0.15)",
+              width: { xs: 44, sm: 56 },
+              height: { xs: 44, sm: 56 },
+              borderRadius: "12px",
               backgroundColor: "transparent",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               overflow: "hidden",
-              border: "1px solid rgba(0, 0, 0, 0.05)",
             }}
           >
             <img
@@ -99,38 +104,36 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ data, isLoading }) => {
             />
           </Box>
           <Typography
-            variant="h3"
+            variant="h4"
             fontWeight="bold"
             color="black"
-            textAlign="center"
-            sx={{ fontFamily: '"Josefin Sans", sans-serif', fontSize: { xs: "2rem", md: "2.5rem" } }}
+            sx={{ 
+              fontFamily: '"Josefin Sans", sans-serif', 
+              fontSize: { xs: "1.375rem", sm: "2rem", md: "2.25rem" } 
+            }}
           >
             {data.companyName || "Konnect"}
           </Typography>
         </Box>
+
         <Box
-            sx={{
-              backgroundColor: "#F7BC10",
-              color: "black",
-              px: 2,
-              py: 0.75,
-              borderRadius: "8px",
-              fontWeight: "bold",
-              fontSize: { xs: "0.875rem", md: "1.125rem" },
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-              // boxShadow: "0px 4px 10px rgba(252, 166, 30, 0.3)",
-              fontFamily: '"Josefin Sans", sans-serif',
-              whiteSpace: "nowrap",
-              ml: { xs: "auto", sm: "auto" },
-              mr: { xs: "auto", sm: "unset" },
-              width: "fit-content",
-              mt: { xs: 2, sm: 0 },
-            }}
-          >
-            Konnects: {data.selfies.length}
-          </Box>
+          sx={{
+            position: "absolute",
+            right: { xs: 16, sm: 24 },
+            backgroundColor: "#F7BC10",
+            color: "black",
+            px: { xs: 1.5, sm: 2 },
+            py: 0.75,
+            borderRadius: "12px",
+            fontWeight: "bold",
+            fontSize: { xs: "0.875rem", md: "1.125rem" },
+            fontFamily: '"Josefin Sans", sans-serif',
+            whiteSpace: "nowrap",
+            boxShadow: "0px 4px 12px rgba(247, 188, 16, 0.15)",
+          }}
+        >
+          Konnects: {data.selfies.length}
+        </Box>
       </Paper>
 
       <Box sx={{ px: { xs: 2, sm: 4 }, pb: 4 }}>

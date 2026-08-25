@@ -226,7 +226,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
 
       <Box display="flex" justifyContent="center" mt={2}>
         <GlobalButton onClick={onGoHome} sx={{ width: '100%', maxWidth: 400 }}>
-          Find Another Teammate
+          Find Another Connection
         </GlobalButton>
       </Box>
     </Box>

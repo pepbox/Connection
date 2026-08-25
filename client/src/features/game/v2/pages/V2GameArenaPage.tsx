@@ -139,7 +139,7 @@ const V2GameArenaPage: React.FC = () => {
                 </Typography>
 
                 <Typography variant="body2" color="text.secondary">
-                  We sent a connection request to your teammate. Once they accept, you'll exchange custom questions.
+                  We sent a connection request to your connection. Once they accept, you'll exchange custom questions.
                 </Typography>
 
                 <Box display="flex" alignItems="center" gap={1.5} sx={{ color: "secondary.main", mt: 2 }}>
@@ -243,7 +243,7 @@ const V2GameArenaPage: React.FC = () => {
                   <Box display="flex" alignItems="center" gap={1.5} sx={{ color: "secondary.main", mt: 2 }}>
                     <CircularProgress size={20} color="secondary" />
                     <Typography variant="body2" fontWeight="bold">
-                      Waiting for teammate...
+                      Waiting for connection...
                     </Typography>
                   </Box>
                 </Box>

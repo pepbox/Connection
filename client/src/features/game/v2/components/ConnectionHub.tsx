@@ -93,7 +93,7 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
                       Connect Request!
                     </Typography>
                     <Typography variant="body2" color="text.secondary" fontWeight="500" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
-                      {connectionStatus.partner.name} wants to partner up with you
+                      {connectionStatus.partner.name} wants to connect with you
                     </Typography>
                   </Box>
                 </Box>
@@ -135,10 +135,10 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
       {/* Title & Stats */}
       <Box sx={{ textAlign: "center", mt: 1 }}>
         <Typography variant="h4" fontWeight="800" sx={{ color: "primary.main", mb: 1 }}>
-          Find a Partner
+          Establish a connection
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Search for a teammate, send a connection request, and solve custom questions together.
+          Find a connection and answer their question to take a selfie!
         </Typography>
       </Box>
 
@@ -146,7 +146,7 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
       <TextField
         fullWidth
         variant="outlined"
-        placeholder="Search teammate by name..."
+        placeholder="Search connection by name..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         InputProps={{
@@ -161,15 +161,15 @@ const ConnectionHub: React.FC<ConnectionHubProps> = ({ connectionStatus }) => {
         }}
       />
 
-      {/* Teammates List */}
+      {/* Connections List */}
       <Box sx={{ flex: 1, minHeight: "200px" }}>
         {isLoadingPlayers ? (
           <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ py: 4 }}>
-            Loading teammates...
+            Loading connections...
           </Typography>
         ) : filteredPlayers.length === 0 ? (
           <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ py: 4 }}>
-            No teammates found.
+            No connections found.
           </Typography>
         ) : (
           <Grid container spacing={2}>

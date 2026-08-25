@@ -27,7 +27,7 @@ const V2HistoryPage: React.FC = () => {
           Connection History
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", mb: 3 }}>
-          Review your past teammates and the answers you exchanged.
+          Review your past connections and the answers you exchanged.
         </Typography>
 
         {history.length === 0 ? (
