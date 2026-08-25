@@ -104,7 +104,7 @@ export const gameApi = api.injectEndpoints({
           await cacheDataLoaded;
 
           const handleStatusUpdate = () => {
-            dispatch(gameApi.util.invalidateTags(['ConnectionStatus']));
+            dispatch(gameApi.util.invalidateTags(['ConnectionStatus', 'ConnectionHistory']));
           };
 
           const handleTeammatesUpdate = () => {

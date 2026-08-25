@@ -74,7 +74,11 @@ const CustomQuestionsBuilder: React.FC = () => {
     const invalidQuestion = questions.find((q) => q.questionText.trim().length === 0);
     
     if (invalidQuestion || questions.length !== requiredCount) {
-      setErrorMsg(`Please fill out all ${requiredCount} question(s) before submitting.`);
+      setErrorMsg(
+        requiredCount > 1
+          ? `Please fill out all ${requiredCount} questions before submitting.`
+          : "Please fill out your question before submitting."
+      );
       return;
     }
 
@@ -122,10 +126,12 @@ const CustomQuestionsBuilder: React.FC = () => {
         }}
       >
         <Typography variant="h4" fontWeight="bold" mb={1} sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
-          Create Your Questions!
+          {requiredCount > 1 ? "Curate Your Questions!" : "Curate Your Question!"}
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.9, color: "white", fontFamily: '"Josefin Sans", sans-serif' }}>
-          Write {requiredCount} fun fact{requiredCount > 1 ? "s" : ""} or trivia question{requiredCount > 1 ? "s" : ""} about yourself for another player to answer.
+          {requiredCount > 1
+            ? `Curate ${requiredCount} realistic questions about yourself.`
+            : "Curate a realistic question about yourself."}
         </Typography>
       </Box>
 
@@ -135,7 +141,7 @@ const CustomQuestionsBuilder: React.FC = () => {
           flex: 1,
           px: 2,
           mt: -5,
-          pb: 12,
+          pb: 4,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -175,7 +181,7 @@ const CustomQuestionsBuilder: React.FC = () => {
             <TextField
               fullWidth
               variant="outlined"
-              label="Private Answer (Optional)"
+              label="Answer (Optional)"
               placeholder="e.g. Playing the Ukulele"
               value={question.correctAnswer}
               onChange={(e) => handleChangeQuestion(index, "correctAnswer", e.target.value)}
@@ -189,33 +195,30 @@ const CustomQuestionsBuilder: React.FC = () => {
             {errorMsg}
           </Typography>
         )}
-      </Box>
 
-      {/* Sticky Bottom Submit Button */}
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          bgcolor: "white",
-          borderTop: "1px solid #e0e0e0",
-          py: 2,
-          px: 4,
-          display: "flex",
-          justifyContent: "center",
-          zIndex: 10
-        }}
-      >
-        <GlobalButton
-          fullWidth
-          disabled={isLoading}
-          onClick={handlePreSubmit}
-          sx={{ maxWidth: "400px" }}
-          startIcon={<Save />}
+        {/* Submit Button right below the fields */}
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "400px",
+            mt: 1,
+            display: "flex",
+            justifyContent: "center",
+          }}
         >
-          {isLoading ? "Saving..." : "Submit Questions"}
-        </GlobalButton>
+          <GlobalButton
+            fullWidth
+            disabled={isLoading}
+            onClick={handlePreSubmit}
+            startIcon={<Save />}
+          >
+            {isLoading
+              ? "Saving..."
+              : requiredCount > 1
+              ? "Submit Questions"
+              : "Submit Question"}
+          </GlobalButton>
+        </Box>
       </Box>
 
       {/* Double verification dialog */}
@@ -236,7 +239,9 @@ const CustomQuestionsBuilder: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="confirm-submit-dialog-description" sx={{ fontFamily: '"Josefin Sans", sans-serif', color: "text.secondary" }}>
-            Are you sure you want to submit your custom questions? You won't be able to edit them after submitting.
+            {requiredCount > 1
+              ? "Are you sure you want to submit your custom questions? You won't be able to edit them after submitting."
+              : "Are you sure you want to submit your custom question? You won't be able to edit it after submitting."}
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>

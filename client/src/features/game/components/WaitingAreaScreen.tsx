@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import waitingVideo from "../../../assets/Waiting-lobby-animation.webm";
+import waitingWebp from "../../../assets/Waiting-lobby-animation.webp";
 import konnectLogo from "../../../assets/Konnect-Logo.webp";
 
 import { useNavigate } from "react-router-dom";
@@ -29,15 +29,14 @@ const WaitingAreaScreen: React.FC = () => {
       sx={{
         overflow: "hidden",
         position: "relative",
-        // width: (radius + size) * 1.8,
         width: "100%",
-        // height: (radius + size) * 1.8,
         height: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
         margin: "0 auto",
+        backgroundColor: "transparent",
       }}
     >
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
@@ -47,11 +46,7 @@ const WaitingAreaScreen: React.FC = () => {
         {sessionData?.companyName || "Konnect"}
       </Typography>
       <Box
-        component="video"
-        autoPlay
-        loop
-        muted
-        playsInline
+        component="img"
         sx={{
           width: "100%",
           maxWidth: "240px",
@@ -60,7 +55,8 @@ const WaitingAreaScreen: React.FC = () => {
           mt: 4,
           mb: 4,
         }}
-        src={waitingVideo}
+        src={waitingWebp}
+        alt="Waiting Lobby Animation"
       />
       <Typography variant="h5" fontWeight="bold" color="text.primary" textAlign="center">
         Waiting for other players...

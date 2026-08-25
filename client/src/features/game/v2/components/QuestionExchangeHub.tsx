@@ -4,10 +4,8 @@ import {
   Typography,
   TextField,
   Paper,
-  Avatar,
-  Divider,
 } from "@mui/material";
-import { Send, Quiz } from "@mui/icons-material";
+import { Send } from "@mui/icons-material";
 import { useSubmitCustomAnswersMutation } from "../../services/gameArena.Api";
 import GlobalButton from "../../../../components/ui/button";
 
@@ -22,7 +20,6 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
   connectionId,
   partnerQuestions,
   partnerName,
-  partnerProfilePhoto,
 }) => {
   const [submitAnswers, { isLoading }] = useSubmitCustomAnswersMutation();
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -65,7 +62,7 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
   };
 
   return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3, pb: 10 }}>
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3, pb: 4 }}>
       {/* Partner Banner Header */}
       <Box
         sx={{
@@ -74,29 +71,17 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
           alignItems: "center",
           background: "linear-gradient(135deg, #ef3349 0%, #ff7c27 100%)",
           color: "white",
-          borderRadius: "16px",
+          borderRadius: 3,
           p: 3,
-          boxShadow: "0px 4px 20px rgba(239, 51, 73, 0.2)",
-          position: "relative",
-          mb: 1,
+          boxShadow: "0 8px 32px 0 rgba(239, 51, 73, 0.2)",
+          textAlign: "center",
         }}
       >
-        <Avatar
-          src={partnerProfilePhoto}
-          alt={partnerName}
-          sx={{
-            width: 80,
-            height: 80,
-            border: "4px solid white",
-            boxShadow: "0px 8px 24px rgba(0,0,0,0.15)",
-            mb: 2,
-          }}
-        />
-        <Typography variant="h5" fontWeight="bold" sx={{ fontFamily: '"Josefin Sans", sans-serif' }}>
-          Get to Know {partnerName}
+        <Typography variant="h5" fontWeight="800" gutterBottom>
+          Partner Connected!
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9, textAlign: "center", mt: 0.5, fontFamily: '"Josefin Sans", sans-serif' }}>
-          Answer their custom questions below to exchange facts!
+        <Typography variant="body1" sx={{ opacity: 0.9 }}>
+          You have connected with <strong>{partnerName}</strong>. Answer their question below to proceed!
         </Typography>
       </Box>
 
@@ -105,37 +90,30 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
         {partnerQuestions.map((q, index) => (
           <Paper
             key={q._id}
-            elevation={2}
+            elevation={0}
             sx={{
               p: 3,
-              borderLeft: "6px solid",
-              borderLeftColor: "primary.main",
+              borderRadius: 3,
+              border: "1px solid #f0f0f0",
+              bgcolor: "#fcfcfa",
+              boxShadow: "0 4px 20px 0 rgba(0,0,0,0.02)",
             }}
           >
-            <Box display="flex" alignItems="center" gap={1.5} mb={2}>
-              <Quiz color="secondary" />
-              <Typography variant="subtitle1" fontWeight="bold" color="primary.dark">
-                Question {index + 1} of {partnerQuestions.length}
-              </Typography>
-            </Box>
-
-            <Typography
-              variant="body1"
-              fontWeight="500"
-              color="text.primary"
-              sx={{ mb: 2, fontSize: "17px", lineHeight: 1.5 }}
-            >
+            <Typography variant="subtitle1" fontWeight="bold" color="text.secondary" gutterBottom>
+              Question {index + 1}
+            </Typography>
+            <Typography variant="h6" fontWeight="bold" color="text.primary" sx={{ mb: 2 }}>
               {q.questionText}
             </Typography>
 
-            <Divider sx={{ mb: 2 }} />
-
+            <Typography variant="subtitle2" fontWeight="bold" color="text.secondary" gutterBottom>
+              Your Answer
+            </Typography>
             <TextField
               fullWidth
               multiline
-              rows={2}
+              rows={3}
               variant="outlined"
-              label="Your Answer"
               placeholder="Type your answer here..."
               value={answers[q._id] || ""}
               onChange={(e) => handleAnswerChange(q._id, e.target.value)}
@@ -151,20 +129,12 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
         </Typography>
       )}
 
-      {/* Sticky Bottom Actions */}
+      {/* Submit Action */}
       <Box
         sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          bgcolor: "white",
-          borderTop: "1px solid #e0e0e0",
-          py: 2,
-          px: 4,
+          mt: 1,
           display: "flex",
           justifyContent: "center",
-          zIndex: 10,
         }}
       >
         <GlobalButton

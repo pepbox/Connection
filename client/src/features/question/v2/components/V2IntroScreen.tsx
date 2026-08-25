@@ -69,26 +69,26 @@ const V2IntroScreen: React.FC = () => {
     {
       id: 0,
       icon: "📝",
-      title: "Create Questions",
-      description: "Write custom questions and fun trivia about yourself.",
+      title: "Curate a Question",
+      description: "Curate a realistic question about yourself",
     },
     {
       id: 1,
       icon: "🔗",
-      title: "Find a Partner",
-      description: "Search and connect with a teammate in real-time.",
+      title: "Find a Connection",
+      description: "Establish connection with a fellow participant",
     },
     {
       id: 2,
       icon: "🧠",
-      title: "Answer Partner",
-      description: "Exchange and answer your partner's custom questions.",
+      title: "Answer the Question",
+      description: "Answer the question of the connection you have established",
     },
     {
       id: 3,
       icon: "📸",
-      title: "Take a Selfie",
-      description: "Snap a photo together with your partner to complete the connection!",
+      title: "Click a Selfie",
+      description: "Take a selfie together with the person you have connected",
     },
   ];
 
@@ -281,7 +281,7 @@ const V2IntroScreen: React.FC = () => {
               maxWidth: "300px",
             }}
           >
-            Jump in
+            Jump In
           </GlobalButton>
         ) : (
           <Box
