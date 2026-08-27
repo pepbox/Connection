@@ -153,7 +153,7 @@ const PlayerResponsesModal: React.FC<PlayerResponsesModalProps> = ({
                       fontSize: { xs: 12, sm: 14 },
                     }}
                   >
-                    Response
+                    Exchange Status / Response
                   </TableCell>
                 </TableRow>
               </TableHead>

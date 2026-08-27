@@ -6,7 +6,7 @@ import {
   Divider,
   Grid,
 } from "@mui/material";
-import { Celebration, Quiz, EmojiEmotions } from "@mui/icons-material";
+import { Celebration, Quiz, EmojiEmotions, CheckCircle } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import GlobalButton from "../../../../components/ui/button";
 
@@ -33,17 +33,7 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
     partnerSelfieUrl,
     myQuestions,
     partnerQuestions,
-    myAnswers,
-    partnerAnswers,
   } = data;
-
-  const getAnswerForQuestion = (
-    questionId: string,
-    answersList: Array<{ questionId: string; answer: string }>
-  ) => {
-    const matched = answersList.find((a) => a.questionId === questionId);
-    return matched ? matched.answer : "No answer provided";
-  };
 
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3, pb: 6 }}>
@@ -157,10 +147,10 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
 
       {/* Custom Questions Exchange Summary */}
       <Paper elevation={1} sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3 }}>
-        {/* Answers to Partner Questions */}
+        {/* Questions Asked by Partner */}
         <Box>
           <Typography variant="h6" fontWeight="bold" sx={{ color: "primary.main", fontFamily: '"Josefin Sans", sans-serif' }} display="flex" alignItems="center" gap={1} mb={2}>
-            <Quiz /> Your Answers to {partner.name}'s Questions
+            <Quiz /> Questions Discussed with {partner.name}
           </Typography>
           {partnerQuestions.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
@@ -178,50 +168,94 @@ const V2CompletionPage: React.FC<V2CompletionPageProps> = ({ data, onGoHome }) =
                   }}
                 >
                   <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
-                    Q: {q.questionText}
+                    {partner.name}'s Question: {q.questionText}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: "500" }}>
-                    A: {getAnswerForQuestion(q._id, myAnswers)}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.75,
+                      mt: 1,
+                      px: 1.25,
+                      py: 0.5,
+                      borderRadius: "6px",
+                      bgcolor: "rgba(46, 125, 50, 0.08)",
+                      border: "1px solid rgba(46, 125, 50, 0.2)",
+                    }}
+                  >
+                    <CheckCircle sx={{ fontSize: 14, color: "#2e7d32" }} />
+                    <Typography
+                      sx={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        color: "#2e7d32",
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      Discussed & Answered Verbally
+                    </Typography>
+                  </Box>
                 </Box>
               ))}
             </Box>
           )}
         </Box>
 
-        <Divider />
+        {myQuestions.length > 0 && (
+          <>
+            <Divider />
 
-        {/* Partner Answers to My Questions */}
-        <Box>
-          <Typography variant="h6" fontWeight="bold" sx={{ color: "warning.main", fontFamily: '"Josefin Sans", sans-serif' }} display="flex" alignItems="center" gap={1} mb={2}>
-            <EmojiEmotions /> {partner.name}'s Answers to Your Questions
-          </Typography>
-          {myQuestions.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No questions written.
-            </Typography>
-          ) : (
-            <Box display="flex" flexDirection="column" gap={2}>
-              {myQuestions.map((q) => (
-                <Box
-                  key={q._id}
-                  sx={{
-                    p: 2,
-                    bgcolor: "rgba(253, 140, 67, 0.05)",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
-                    Q: {q.questionText}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: "500" }}>
-                    A: {getAnswerForQuestion(q._id, partnerAnswers)}
-                  </Typography>
-                </Box>
-              ))}
+            {/* Questions Asked by Me */}
+            <Box>
+              <Typography variant="h6" fontWeight="bold" sx={{ color: "warning.main", fontFamily: '"Josefin Sans", sans-serif' }} display="flex" alignItems="center" gap={1} mb={2}>
+                <EmojiEmotions /> Questions You Asked {partner.name}
+              </Typography>
+              <Box display="flex" flexDirection="column" gap={2}>
+                {myQuestions.map((q) => (
+                  <Box
+                    key={q._id}
+                    sx={{
+                      p: 2,
+                      bgcolor: "rgba(253, 140, 67, 0.05)",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
+                      Your Question: {q.questionText}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        mt: 1,
+                        px: 1.25,
+                        py: 0.5,
+                        borderRadius: "6px",
+                        bgcolor: "rgba(46, 125, 50, 0.08)",
+                        border: "1px solid rgba(46, 125, 50, 0.2)",
+                      }}
+                    >
+                      <CheckCircle sx={{ fontSize: 14, color: "#2e7d32" }} />
+                      <Typography
+                        sx={{
+                          fontSize: "0.75rem",
+                          fontWeight: 700,
+                          color: "#2e7d32",
+                          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                          letterSpacing: "0.01em",
+                        }}
+                      >
+                        Discussed & Answered Verbally
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
             </Box>
-          )}
-        </Box>
+          </>
+        )}
       </Paper>
 
       <Box display="flex" justifyContent="center" mt={2}>

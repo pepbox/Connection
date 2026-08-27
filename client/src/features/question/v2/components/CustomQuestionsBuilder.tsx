@@ -11,7 +11,6 @@ import { RootState } from "../../../../app/store";
 
 interface QuestionInput {
   questionText: string;
-  correctAnswer: string;
 }
 
 const CustomQuestionsBuilder: React.FC = () => {
@@ -29,7 +28,7 @@ const CustomQuestionsBuilder: React.FC = () => {
   const isGameStarted = useAppSelector((state: RootState) => state.game.isGameStarted);
 
   const [questions, setQuestions] = useState<QuestionInput[]>(() =>
-    Array.from({ length: requiredCount }, () => ({ questionText: "", correctAnswer: "" }))
+    Array.from({ length: requiredCount }, () => ({ questionText: "" }))
   );
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -51,7 +50,6 @@ const CustomQuestionsBuilder: React.FC = () => {
         if (prev.length < requiredCount) {
           const added = Array.from({ length: requiredCount - prev.length }, () => ({
             questionText: "",
-            correctAnswer: "",
           }));
           return [...prev, ...added];
         }
@@ -60,10 +58,10 @@ const CustomQuestionsBuilder: React.FC = () => {
     }
   }, [requiredCount]);
 
-  const handleChangeQuestion = (index: number, field: keyof QuestionInput, value: string) => {
+  const handleChangeQuestion = (index: number, value: string) => {
     setQuestions((prev) => {
       const updated = [...prev];
-      updated[index][field] = value;
+      updated[index].questionText = value;
       return updated;
     });
     if (errorMsg) setErrorMsg(null);
@@ -92,7 +90,6 @@ const CustomQuestionsBuilder: React.FC = () => {
       await addCustomQuestions({
         questions: questions.map((q) => ({
           questionText: q.questionText.trim(),
-          correctAnswer: q.correctAnswer.trim() || undefined,
         }))
       }).unwrap();
 
@@ -173,18 +170,7 @@ const CustomQuestionsBuilder: React.FC = () => {
               label={`The Question #${index + 1}`}
               placeholder="e.g. What is my secret hobby or talent?"
               value={question.questionText}
-              onChange={(e) => handleChangeQuestion(index, "questionText", e.target.value)}
-              sx={{ mb: 2 }}
-              inputProps={{ maxLength: 100 }}
-            />
-
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="Answer (Optional)"
-              placeholder="e.g. Playing the Ukulele"
-              value={question.correctAnswer}
-              onChange={(e) => handleChangeQuestion(index, "correctAnswer", e.target.value)}
+              onChange={(e) => handleChangeQuestion(index, e.target.value)}
               inputProps={{ maxLength: 100 }}
             />
           </Paper>

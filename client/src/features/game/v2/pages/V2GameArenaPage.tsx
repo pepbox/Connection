@@ -170,8 +170,8 @@ const V2GameArenaPage: React.FC = () => {
 
   // Status is "connected"
   if (data.status === "connected") {
-    const hasIAnswered = data.myAnswers && data.myAnswers.length === (data.partnerQuestions?.length || 0);
-    const hasPartnerAnswered = data.partnerAnswers && data.partnerAnswers.length === (data.myQuestions?.length || 0);
+    const hasIAnswered = Boolean(data.myAnswers && data.myAnswers.length > 0);
+    const hasPartnerAnswered = Boolean(data.partnerAnswers && data.partnerAnswers.length > 0);
 
     // Sub-state 1: Player hasn't answered the partner's questions yet
     if (!hasIAnswered) {

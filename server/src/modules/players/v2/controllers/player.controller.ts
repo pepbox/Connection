@@ -48,7 +48,6 @@ export const addCustomQuestions = async (
       player: playerId,
       session: sessionId,
       questionText: q.questionText,
-      correctAnswer: q.correctAnswer,
     }));
 
     const createdQuestions = await CustomQuestion.insertMany(questionsData);

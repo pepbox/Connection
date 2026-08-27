@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Box, Typography, Paper, Avatar, CircularProgress, IconButton, Collapse } from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import { ExpandMore, ExpandLess, CheckCircle } from "@mui/icons-material";
 import { useGetConnectionHistoryQuery } from "../../services/gameArena.Api";
 import GameHeader from "../../../../components/layout/GameHeader";
 
@@ -75,61 +75,92 @@ const V2HistoryPage: React.FC = () => {
 
                   <Collapse in={isExpanded} unmountOnExit>
                     <Box mt={3} display="flex" flexDirection="column" gap={3}>
-                      {/* Your Responses */}
+                      {/* Questions Exchanged */}
                       <Box>
                         <Typography variant="subtitle1" sx={{ color: "primary.main" }} fontWeight="bold" mb={2}>
-                          Your Responses
+                          Questions Exchanged & Discussed
                         </Typography>
                         <Box display="flex" flexDirection="column" gap={2}>
-                          {conn.myAnswers?.map((ans: any) => {
-                            const question = conn.partnerQuestions?.find((q: any) => q._id === ans.questionId);
-                            return (
+                          {conn.partnerQuestions?.map((q: any) => (
+                            <Box
+                              key={q._id}
+                              sx={{
+                                p: 2,
+                                bgcolor: "rgba(239, 51, 73, 0.05)",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
+                                {conn.partner?.name}'s Question: {q.questionText}
+                              </Typography>
                               <Box
-                                key={ans.questionId}
                                 sx={{
-                                  p: 2,
-                                  bgcolor: "rgba(239, 51, 73, 0.05)",
-                                  borderRadius: "8px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 0.75,
+                                  mt: 1,
+                                  px: 1.25,
+                                  py: 0.5,
+                                  borderRadius: "6px",
+                                  bgcolor: "rgba(46, 125, 50, 0.08)",
+                                  border: "1px solid rgba(46, 125, 50, 0.2)",
                                 }}
                               >
-                                <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
-                                  Q: {question?.questionText || "Unknown Question"}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: "500" }}>
-                                  A: {ans.answer}
+                                <CheckCircle sx={{ fontSize: 14, color: "#2e7d32" }} />
+                                <Typography
+                                  sx={{
+                                    fontSize: "0.75rem",
+                                    fontWeight: 700,
+                                    color: "#2e7d32",
+                                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                    letterSpacing: "0.01em",
+                                  }}
+                                >
+                                  Discussed & Answered Verbally
                                 </Typography>
                               </Box>
-                            );
-                          })}
-                        </Box>
-                      </Box>
-
-                      {/* Partner Responses */}
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ color: "warning.main" }} fontWeight="bold" mb={2}>
-                          {conn.partner?.name}'s Responses
-                        </Typography>
-                        <Box display="flex" flexDirection="column" gap={2}>
-                          {conn.partnerAnswers?.map((ans: any) => {
-                            const question = conn.myQuestions?.find((q: any) => q._id === ans.questionId);
-                            return (
+                            </Box>
+                          ))}
+                          {conn.myQuestions?.map((q: any) => (
+                            <Box
+                              key={q._id}
+                              sx={{
+                                p: 2,
+                                bgcolor: "rgba(253, 140, 67, 0.05)",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
+                                Your Question: {q.questionText}
+                              </Typography>
                               <Box
-                                key={ans.questionId}
                                 sx={{
-                                  p: 2,
-                                  bgcolor: "rgba(253, 140, 67, 0.05)",
-                                  borderRadius: "8px",
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 0.75,
+                                  mt: 1,
+                                  px: 1.25,
+                                  py: 0.5,
+                                  borderRadius: "6px",
+                                  bgcolor: "rgba(46, 125, 50, 0.08)",
+                                  border: "1px solid rgba(46, 125, 50, 0.2)",
                                 }}
                               >
-                                <Typography variant="subtitle2" fontWeight="bold" color="text.primary">
-                                  Q: {question?.questionText || "Unknown Question"}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: "500" }}>
-                                  A: {ans.answer}
+                                <CheckCircle sx={{ fontSize: 14, color: "#2e7d32" }} />
+                                <Typography
+                                  sx={{
+                                    fontSize: "0.75rem",
+                                    fontWeight: 700,
+                                    color: "#2e7d32",
+                                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                                    letterSpacing: "0.01em",
+                                  }}
+                                >
+                                  Discussed & Answered Verbally
                                 </Typography>
                               </Box>
-                            );
-                          })}
+                            </Box>
+                          ))}
                         </Box>
                       </Box>
                     </Box>
