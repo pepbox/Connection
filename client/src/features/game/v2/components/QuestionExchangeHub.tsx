@@ -77,7 +77,7 @@ const QuestionExchangeHub: React.FC<QuestionExchangeHubProps> = ({
           Connected with {partnerName}!
         </Typography>
         <Typography variant="body1" sx={{ opacity: 0.95, fontWeight: "500", fontFamily: '"Josefin Sans", sans-serif' }}>
-          Exchange the question and answer in-person
+          Exchange the questions and answers in-person
         </Typography>
       </Box>
 
